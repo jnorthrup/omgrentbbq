@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+    </ui:style>
+    <g:HTMLPanel>
+
+            name         <g:TextBox title="name" ui:field="name"/><br/>
+        <!--email         <g:TextBox title="email" ui:field="email"/><br/>-->
+        <!--password1         <g:PasswordTextBox title="password1" ui:field="password1"/><br/>-->
+        <!--password2         <g:PasswordTextBox title="password2" ui:field="password2"/><br/>-->
+        address1         <g:TextBox title="address1" ui:field="address1"/><br/>
+        address2         <g:TextBox title="address2" ui:field="address2"/><br/>
+        city         <g:TextBox title="city" ui:field="city"/><br/>
+        state         <g:TextBox title="state" ui:field="state"/><br/>
+        zip         <g:TextBox title="zip" ui:field="zip"/><br/>
+        phone         <g:TextBox title="phone" ui:field="phone"/><br/>
+          <g:Button text="ok" ui:field="okButton"/>
+        <g:Button text="map" ui:field="mapButton"/>
+          <!--<g:Button text="cancel" ui:field="cancelButton"/>   <br/>-->
+          <g:CaptionPanel title="captionPanel" ui:field="captionPanel"/>
+           <g:Image ui:field="mapImage" visible="false"
+                   >
+                
+           </g:Image>
+
+                 <!-- Google Public Location Badge -->
+<!-- To disable location sharing, you *must* visit http://www.google.com/latitude/apps/badge and disable the Google Public Location badge. Removing this code snippet is not enough! -->
+
+                   <!--<g:HTML><iframe src="http://www.google.com/latitude/apps/badge/api?user=7382310812150232609&type=iframe&maptype=roadmap" width="180" height="300" frameborder="0"></iframe></g:HTML>-->
+    </g:HTMLPanel>
+
+</ui:UiBinder>

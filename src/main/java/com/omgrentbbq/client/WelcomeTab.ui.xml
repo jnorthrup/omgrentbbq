@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='res' type='com.omgrentbbq.client.resources.MainBundle'/>
+
+    <g:HTMLPanel>
+
+
+    </g:HTMLPanel>
+</ui:UiBinder>
