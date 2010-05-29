@@ -1,24 +1,10 @@
 package com.omgrentbbq.client;
 
 
-import com.google.gwt.accounts.client.AuthSubStatus;
-import com.google.gwt.accounts.client.User;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.gdata.client.DateTime;
-import com.google.gwt.gdata.client.GData;
-import com.google.gwt.gdata.client.GDataSystemPackage;
-import com.google.gwt.gdata.client.When;
-import com.google.gwt.gdata.client.atom.Text;
-import com.google.gwt.gdata.client.calendar.CalendarEventEntry;
-import com.google.gwt.gdata.client.calendar.CalendarEventEntryCallback;
-import com.google.gwt.gdata.client.calendar.CalendarExtendedProperty;
-import com.google.gwt.gdata.client.calendar.CalendarService;
-import com.google.gwt.gdata.client.impl.CallErrorException;
- import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
@@ -27,7 +13,6 @@ import com.omgrentbbq.shared.model.Member;
 import com.omgrentbbq.shared.model.PayGroup;
 import com.omgrentbbq.shared.model.UserSession;
 
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -56,13 +41,17 @@ public class OmgRentBbq implements EntryPoint {
     private Anchor authLink = new Anchor("Sign In");
     private static final LoginServiceAsync LOGIN_SERVICE = GWT.create(LoginService.class);
     private WelcomeTab welcomeTab = new WelcomeTab();
-    private static final String GDATA_API_KEY = "ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA";
+    static String GDATA_API_KEY;
     private static final Random RANDOM = new Random();
-    private SimplePanel htmlHolder;
     //"ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA-OX2XYmEAa76BRl5-EVx5PbQ1VFzCJyQmfA43hlLA";
 
     public void onModuleLoad() {
-
+        final String host = Window.Location.getHost();
+        final String proto = Window.Location.getProtocol();
+        GDATA_API_KEY = host.startsWith("127.0.0.1") ? "ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA" :
+                proto.startsWith("https") ?
+                        /*https://omgrentbbq.com*/"ABQIAAAAWpB08GH6KmKITXI7rtGRpBQP9W7Y7I5qr-k1KpACLx2-LL8VZRSAmDzEx8058dg-LbfPzLfgD1bPqQ" :
+                        "ABQIAAAAWpB08GH6KmKITXI7rtGRpBSZ0_RId71_G7aCA6qntwd15T_WaBRjfmPbE7W4RF2InR8N8OZxXPGNTQ";
         mainPanel.add(new Image(MainBundle.INSTANCE.logo()), DockPanel.WEST);
         mainPanel.add(authPanel, DockPanel.EAST);
         RootPanel.get().clear();
@@ -180,7 +169,11 @@ public class OmgRentBbq implements EntryPoint {
             public void onSuccess(final Member member) {
 
 
-                userMain(tabPanel);
+                final AgendaHelper helper = new AgendaHelper(  tabPanel, session);
+
+                tabPanel.add(new ManageHelper(OmgRentBbq.this, helper), "Manage");
+                tabPanel.add(new Label("PlaceHolder"), "Groups");
+                tabPanel.add(new Label("PlaceHolder"), "Support");
 
             }
         });
@@ -188,143 +181,6 @@ public class OmgRentBbq implements EntryPoint {
 
     }
 
-    private void userMain(final TabPanel tabPanel) {
 
-        htmlHolder = new SimplePanel();
-        tabPanel.add(htmlHolder, "Summary Page");
-
-        freshCalendar(htmlHolder);
-        tabPanel.add(new MyHorizontalPanel(), "Manage");
-        tabPanel.add(new Label("PlaceHolder"), "Groups");
-        tabPanel.add(new Label("PlaceHolder"), "Support");
-
-    }
-
-    private   void freshCalendar(SimplePanel htmlHolder) {
-        final HTML html = new HTML(
-                "<iframe " +
-                "src='http://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;" +
-                "src=" +
-                session.user.emailAddress +
-                "&amp;color=%231B887A&amp;ctz=Pacific' " +
-                "style='border-width:0'  width=600 height=500 frameborder=0 scrolling='no'&amp;_r"+  new Random().nextGaussian()+" />"  );
-        htmlHolder.clear();
-        htmlHolder.setWidget(html);
-    }
-
-
-    class MyHorizontalPanel extends HorizontalPanel {
-
-        private CalendarService service;
-        private FlexTable mainPanel = new FlexTable();
-
-        {
-            add(mainPanel);
-            init();
-        }
-
-        private final String scope = "http://www.google.com/calendar/feeds/";
-
-        /**
-         * Setup the Calendar service and create the main content panel.
-         * If the user is not logged on to Calendar display a message,
-         * otherwise start the demo by creating an event.
-         */
-        public void init() {
-            if (!GData.isLoaded(GDataSystemPackage.CALENDAR)) {
-                showStatus("Loading the GData Calendar package...", false);
-                GData.loadGDataApi(GDATA_API_KEY, new Runnable() {
-                    public void run() {
-                        startDemo();
-                    }
-                }, GDataSystemPackage.CALENDAR);
-            } else {
-                startDemo();
-            }
-        }
-
-        /**
-         * Create a calendar event by inserting an event entry into
-         * a calendar events feed.
-         * Set the event's title to an arbitrary string. Here
-         * we prefix the title with 'GWT-Calendar-Client' so that
-         * we can identify which events were created by this demo.
-         * We also specify values for time span and an extended
-         * property.
-         * On success and failure, display a status message.
-         *
-         * @param eventsFeedUri The uri of the events feed into which to
-         *                      insert the new event
-         */
-        @SuppressWarnings("deprecation")
-        private void createEvent(String eventsFeedUri) {
-            showStatus("Creating event reminder...", false);
-            CalendarEventEntry entry = CalendarEventEntry.newInstance();
-            entry.setTitle(Text.newInstance());
-            entry.getTitle().setText("GWT-Calendar-Client: add extended property");
-            When when = When.newInstance();
-            Date startTime = new Date();
-            Date endTime = new Date();
-            endTime.setHours(endTime.getHours() + 1);
-            when.setStartTime(DateTime.newInstance(startTime));
-            when.setEndTime(DateTime.newInstance(endTime));
-            entry.addTime(when);
-            CalendarExtendedProperty extendedProp =
-                    CalendarExtendedProperty.newInstance();
-            extendedProp.setName("mydata");
-            extendedProp.setValue("xyz");
-            entry.addExtendedProperty(extendedProp);
-            service.insertEntry(eventsFeedUri, entry,
-                    new CalendarEventEntryCallback() {
-                        public void onFailure(CallErrorException caught) {
-                            showStatus("An error occurred while creating a Calendar event " +
-                                    "reminder: " + caught.getMessage(), true);
-                        }
-
-                        public void onSuccess(CalendarEventEntry result) {
-                            showStatus("Created an event with an extended property.", false);
-                                                                                            freshCalendar(htmlHolder);
-
-                        }
-                    });
-        }
-
-        /**
-         * Displays a status message to the user.
-         *
-         * @param message The message to display.
-         * @param isError Indicates whether the status is an error status.
-         */
-        private void showStatus(String message, boolean isError) {
-            mainPanel.clear();
-            mainPanel.insertRow(0);
-            mainPanel.addCell(0);
-            Label msg = new Label(message);
-            if (isError) {
-                msg.setStylePrimaryName("Caption");
-            }
-            mainPanel.setWidget(0, 0, msg);
-        }
-
-        /**
-         * Starts this demo.
-         */
-        private void startDemo() {
-            service = CalendarService.newInstance(
-                    "HelloGData_Calendar_CreateEventWithExtendedPropertyDemo_v2.0");
-            if (User.getStatus(scope) == AuthSubStatus.LOGGED_IN) {
-                Button startButton = new Button(
-                        "Create an event with an extended property");
-                startButton.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        createEvent(
-                                "http://www.google.com/calendar/feeds/default/private/full");
-                    }
-                });
-                mainPanel.setWidget(0, 0, startButton);
-            } else {
-                showStatus("You are not logged on to Google Calendar.", true);
-            }
-        }
-    }
 }
+
