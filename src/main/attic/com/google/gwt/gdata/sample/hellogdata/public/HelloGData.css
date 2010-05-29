@@ -1,0 +1,52 @@
+/* Add some space between the outside browser window and the blue border */
+
+h2 {
+	font-stretch: narrower;
+	font-weight: 500;
+	margin: 4px;
+}
+
+
+.gwt-Anchor {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+/* Add some space between the blue border and the interior stuff */
+.hm-body {
+	margin: 10px;
+}
+.hm-outerpanel {
+	margin: 10px;
+}
+.hm-innerpanel {
+	margin: 10px;
+}
+.hm-tableheader {
+	background-color: #E5ECF9;
+	padding: 6px;
+	font-weight: bold;
+}
+.hm-description div {
+    background-color: #DEF4D5;
+    border: solid 1px #C0DF86;
+    padding: 4px;
+}
+.hm-description strong {
+    font-weight: bold;
+    color: green;
+}
+.hm-error {
+    background-color: #E1C2B9;
+    border: solid 1px #B53812;
+    padding: 3px;
+}
+.hm-error strong {
+    font-weight: bold;
+    color: #B53812;
+}
+.hm-title {
+ 	font-size: 1.5em; 
+	font-family: sans-serif;
+	display: inline;	
+}

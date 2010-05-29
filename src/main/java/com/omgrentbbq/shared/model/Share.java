@@ -6,7 +6,7 @@ public class Share implements Serializable {
     ShareType shareType;
     float share;
     Payee payee;
-    Renter renter;
+    Member member;
 
 
 }

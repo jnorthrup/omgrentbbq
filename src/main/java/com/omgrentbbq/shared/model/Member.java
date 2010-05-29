@@ -4,7 +4,7 @@ package com.omgrentbbq.shared.model;
 
 import java.io.Serializable;
 
-public class Renter implements Serializable {
+public class Member implements Serializable {
 
     User user;
 
@@ -12,10 +12,10 @@ public class Renter implements Serializable {
 
     Contact profile;
 
-    Renter() {
+    Member() {
     }
 
-    public Renter(User user, PayGroup payGroup, Contact profile) {
+    public Member(User user, PayGroup payGroup, Contact profile) {
         this.user = user;
         this.payGroup = payGroup;
         this.profile = profile;

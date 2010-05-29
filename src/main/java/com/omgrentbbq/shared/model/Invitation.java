@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class Invitation implements Serializable {
 
 
-    Renter sentBy;
+    Member sentBy;
     //for GWT this suppression and long classname are important.
     @SuppressWarnings({"NonJREEmulationClassesInClientCode"})
     @Type(com.google.appengine.api.datastore.Email.class)

@@ -5,7 +5,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.omgrentbbq.client.LoginService;
-import com.omgrentbbq.shared.model.Renter;
+import com.omgrentbbq.shared.model.Member;
 import com.omgrentbbq.shared.model.User;
 import com.omgrentbbq.shared.model.UserSession;
 import com.vercer.engine.persist.ObjectDatastore;
@@ -43,7 +43,10 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
 
             Date date = new Date(session.getCreationTime());
             UserSession userSession = new UserSession(session.getId(), date, theUser);
-            userSession.logoutUrl = userService.createLogoutURL(requestUri);
+
+            String s="";
+            if(user.getEmail().endsWith("example.com"))s="?gwt.codesvr=127.0.0.1:9997";
+            userSession.logoutUrl = userService.createLogoutURL(requestUri+s);
             userSession.admin = userService.isUserAdmin();
             userSession.loggedIn = userService.isUserLoggedIn();
 
@@ -55,10 +58,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             return userSession;
         } else {
 
+            String s="";
+//            if(user.getEmail().endsWith("example.com"))s="?gwt.codesvr=127.0.0.1:9997";
             UserSession userSession = new UserSession();
-            userSession.loginUrl = userService.createLoginURL(requestUri);
+            userSession.loginUrl = userService.createLoginURL(requestUri+s);
             userSession.loggedIn = false;
-            userSession.logoutUrl = userService.createLogoutURL(requestUri);
+            userSession.logoutUrl = userService.createLogoutURL(requestUri+s);
 
             datastore.storeOrUpdate(userSession);
             session.invalidate();
@@ -77,12 +82,12 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
     }
 
     @Override
-    public Renter getRenter(User user) {
+    public Member getRenter(User user) {
         ObjectDatastore ds = new AnnotationObjectDatastore();
         ds.associate(user);
 
         return ds.find()
-                .type(Renter.class)
+                .type(Member.class)
                 .addFilter("user", Query.FilterOperator.EQUAL, ds.associatedKey(user))
                 .returnResultsNow()
                 .next();

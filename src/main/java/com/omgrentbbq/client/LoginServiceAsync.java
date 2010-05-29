@@ -1,7 +1,7 @@
 package com.omgrentbbq.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.omgrentbbq.shared.model.Renter;
+import com.omgrentbbq.shared.model.Member;
 import com.omgrentbbq.shared.model.User;
 import com.omgrentbbq.shared.model.UserSession;
 
@@ -13,5 +13,5 @@ public interface LoginServiceAsync {
 
     void commitParentEntity(Serializable o, AsyncCallback<Void> async);
 
-    void getRenter(User user, AsyncCallback<Renter> async);
+    void getRenter(User user, AsyncCallback<Member> async);
 }
