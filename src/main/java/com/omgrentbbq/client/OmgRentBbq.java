@@ -18,7 +18,7 @@ import com.google.gwt.gdata.client.calendar.CalendarEventEntryCallback;
 import com.google.gwt.gdata.client.calendar.CalendarExtendedProperty;
 import com.google.gwt.gdata.client.calendar.CalendarService;
 import com.google.gwt.gdata.client.impl.CallErrorException;
-import com.google.gwt.user.client.Window;
+ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
@@ -28,6 +28,7 @@ import com.omgrentbbq.shared.model.PayGroup;
 import com.omgrentbbq.shared.model.UserSession;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -56,6 +57,8 @@ public class OmgRentBbq implements EntryPoint {
     private static final LoginServiceAsync LOGIN_SERVICE = GWT.create(LoginService.class);
     private WelcomeTab welcomeTab = new WelcomeTab();
     private static final String GDATA_API_KEY = "ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA";
+    private static final Random RANDOM = new Random();
+    private SimplePanel htmlHolder;
     //"ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA-OX2XYmEAa76BRl5-EVx5PbQ1VFzCJyQmfA43hlLA";
 
     public void onModuleLoad() {
@@ -186,26 +189,40 @@ public class OmgRentBbq implements EntryPoint {
     }
 
     private void userMain(final TabPanel tabPanel) {
-        tabPanel.add(new HTML("" +
-                "<iframe " +
-                "src='http://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;" +
-                "src=" +
-                session.user.emailAddress +
-                "&amp;color=%231B887A&amp;ctz=Pacific%2FApia' style=' border-width:0 ' width='600' height='500' frameborder='0' scrolling='no'></iframe>" +
-                "" +
-                ""), "Summary Page");
+
+        htmlHolder = new SimplePanel();
+        tabPanel.add(htmlHolder, "Summary Page");
+
+        freshCalendar(htmlHolder);
         tabPanel.add(new MyHorizontalPanel(), "Manage");
         tabPanel.add(new Label("PlaceHolder"), "Groups");
         tabPanel.add(new Label("PlaceHolder"), "Support");
 
     }
 
+    private   void freshCalendar(SimplePanel htmlHolder) {
+        final HTML html = new HTML(
+                "<iframe " +
+                "src='http://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;" +
+                "src=" +
+                session.user.emailAddress +
+                "&amp;color=%231B887A&amp;ctz=Pacific' " +
+                "style='border-width:0'  width=600 height=500 frameborder=0 scrolling='no'&amp;_r"+  new Random().nextGaussian()+" />"  );
+        htmlHolder.clear();
+        htmlHolder.setWidget(html);
+    }
 
-    static class MyHorizontalPanel extends HorizontalPanel {
+
+    class MyHorizontalPanel extends HorizontalPanel {
 
         private CalendarService service;
-        private FlexTable mainPanel=new FlexTable();
-        {add(mainPanel);init();}
+        private FlexTable mainPanel = new FlexTable();
+
+        {
+            add(mainPanel);
+            init();
+        }
+
         private final String scope = "http://www.google.com/calendar/feeds/";
 
         /**
@@ -213,7 +230,7 @@ public class OmgRentBbq implements EntryPoint {
          * If the user is not logged on to Calendar display a message,
          * otherwise start the demo by creating an event.
          */
-       public void init() {
+        public void init() {
             if (!GData.isLoaded(GDataSystemPackage.CALENDAR)) {
                 showStatus("Loading the GData Calendar package...", false);
                 GData.loadGDataApi(GDATA_API_KEY, new Runnable() {
@@ -266,6 +283,8 @@ public class OmgRentBbq implements EntryPoint {
 
                         public void onSuccess(CalendarEventEntry result) {
                             showStatus("Created an event with an extended property.", false);
+                                                                                            freshCalendar(htmlHolder);
+
                         }
                     });
         }
