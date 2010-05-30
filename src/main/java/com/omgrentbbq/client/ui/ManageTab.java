@@ -2,7 +2,6 @@ package com.omgrentbbq.client.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -110,32 +109,7 @@ public class ManageTab extends Composite {
     void addPayee(ClickEvent e) {
         final PopupPanel panel = new PopupPanel();
 
-        panel.setWidget(new VerticalPanel() {{
-            add(new ContactCreationForm());
-            add(new HorizontalPanel() {{
-                add(new Button("Ok") {{
-                    addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent clickEvent) {
-                            panel.hide(true);
-                        }
-                    });
-                }});
-                add(new Button("Cancel") {{
-                    addClickHandler(new ClickHandler() {
-                        @Override
-                        public void onClick(ClickEvent clickEvent) {
-                            panel.hide(true);
-                        }
-                    });
-                }});
-            }});
-        }});
-
-
-        panel.setAnimationEnabled(true);
-        panel.center();
-        panel.setModal(true);
-        panel.setVisible(true);
+        panel.setWidget(new PayeePanel(panel));
     }
+
 }
