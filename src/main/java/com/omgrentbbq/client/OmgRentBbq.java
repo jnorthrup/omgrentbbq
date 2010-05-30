@@ -7,6 +7,9 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.omgrentbbq.client.ui.ContactCreationForm;
+import com.omgrentbbq.client.ui.ManageTab;
+import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.client.resources.MainBundle;
 import com.omgrentbbq.shared.model.Contact;
 import com.omgrentbbq.shared.model.Member;
@@ -171,7 +174,8 @@ public class OmgRentBbq implements EntryPoint {
 
                 final AgendaHelper helper = new AgendaHelper(  tabPanel, session);
 
-                tabPanel.add(new ManageHelper(OmgRentBbq.this, helper), "Manage");
+                tabPanel.add(new ManageTab(helper, session), "Manage");
+                tabPanel.add(new CreateEventUi(helper), "(d)");
                 tabPanel.add(new Label("PlaceHolder"), "Groups");
                 tabPanel.add(new Label("PlaceHolder"), "Support");
 

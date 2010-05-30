@@ -14,7 +14,7 @@ import java.util.Random;
  * Time: 1:31:10 AM
  * To change this template use File | Settings | File Templates.
  */
-class AgendaHelper {
+public class AgendaHelper {
     private final SimplePanel htmlHolder;
     private UserSession session;
 

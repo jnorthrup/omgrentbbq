@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
     <servlet>
         <servlet-name>com.omgrentbbq.OmgRentBbq LoginService</servlet-name>
         <servlet-class>com.omgrentbbq.server.LoginServiceImpl</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>com.omgrentbbq.OmgRentBbq TransactionManager</servlet-name>
+        <servlet-class>com.omgrentbbq.server.TransactionManagerImpl</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>com.omgrentbbq.OmgRentBbq LoginService</servlet-name>
-        <url-pattern>/com.omgrentbbq.OmgRentBbq/login</url-pattern>
+        <url-pattern>/com.omgrentbbq.OmgRentBbq/u</url-pattern>
     </servlet-mapping>
- 
+    <servlet-mapping>
+        <servlet-name>com.omgrentbbq.OmgRentBbq TransactionManager</servlet-name>
+        <url-pattern>/com.omgrentbbq.OmgRentBbq/tm</url-pattern>
+    </servlet-mapping>
 
 
     <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-  </welcome-file-list>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
 
 </web-app>

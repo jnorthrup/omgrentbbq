@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 
 /**
- * The following example demonstrates how to get the top internal site
+ * The following example demonstrates how to get the top internal citeCss
  * searches, their keyword refinements and the page the person was taken to
  * when they clicked on the result.
  */
@@ -56,10 +56,10 @@ public class AnalyticsTopSearchesDemo extends GDataDemo {
       @Override
       public String getDescription() {
         return "<p>This sample demonstrates how to get the top internal " +
-            "site searches, their keyword refinements and the page the " +
+            "citeCss searches, their keyword refinements and the page the " +
             "person was taken to when they clicked on the result.</p>" +
             "<div><strong>Note:</strong> To use this example you'll need " +
-            "to have Google Analytics configured to track internal site " +
+            "to have Google Analytics configured to track internal citeCss " +
             "searches.</div>";
       }
 
@@ -161,17 +161,17 @@ public class AnalyticsTopSearchesDemo extends GDataDemo {
 
   /**
   * Displays a set of Analytics data entries in a tabular fashion with
-  * the help of a GWT FlexTable widget. The Site Search data fields Keywords,
+  * the help of a GWT FlexTable widget. The siteCss Search data fields Keywords,
   * Refinements Keywords, Destination Page and Refinements are displayed.
   * 
   * @param entries The Analytics data entries to display.
   */
   private void showData(DataEntry[] entries) {
     mainPanel.clear();
-    String[] labels = new String[] { "Site Search Keywords",
-        "Site Search Refinements Keywords",
-        "Site Search Destination Page",
-        "Site Search Refinements" };
+    String[] labels = new String[] { "siteCss Search Keywords",
+        "siteCss Search Refinements Keywords",
+        "siteCss Search Destination Page",
+        "siteCss Search Refinements" };
     mainPanel.insertRow(0);
     for (int i = 0; i < labels.length; i++) {
       mainPanel.addCell(0);

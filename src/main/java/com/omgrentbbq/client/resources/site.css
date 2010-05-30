@@ -1,0 +1,11 @@
+
+.groupBox {
+    background: #f5fffa;
+    width: 90%;
+    text-shadow: black 1px 1px 1px;
+    text-transform: capitalize;
+    font-family: fantasy;
+    font-variant: small-caps;
+    font-size: larger;
+    color: #fa8072;
+}

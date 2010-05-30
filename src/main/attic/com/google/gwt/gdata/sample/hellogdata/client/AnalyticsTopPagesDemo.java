@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 
 /**
  * The following example demonstrates how to access the top ten pages
- * ordered by number of pageviews to a given site.
+ * ordered by number of pageviews to a given citeCss.
  */
 public class AnalyticsTopPagesDemo extends GDataDemo {
 

@@ -25,16 +25,14 @@ import java.util.Date;
  * Time: 1:19:31 AM
  * To change this template use File | Settings | File Templates.
  */
-class ManageHelper extends HorizontalPanel {
+class CreateEventUi extends HorizontalPanel {
     private CalendarService service;
     private FlexTable managePanel;
 
     private final String scope;
     private final AgendaHelper helper;
-    private OmgRentBbq omgRentBbq;
 
-    public ManageHelper(OmgRentBbq omgRentBbq, AgendaHelper helper) {
-        this.omgRentBbq = omgRentBbq;
+    public CreateEventUi(AgendaHelper helper) {
         this.helper = helper;
         managePanel = new FlexTable();
         add(managePanel);
@@ -42,11 +40,11 @@ class ManageHelper extends HorizontalPanel {
             showStatus("Loading the GData Calendar package...", false);
             GData.loadGDataApi(OmgRentBbq.GDATA_API_KEY, new Runnable() {
                 public void run() {
-                    startDemo();
+                    manageCalendar();
                 }
             }, GDataSystemPackage.CALENDAR);
         } else {
-            startDemo();
+            manageCalendar();
         }
         scope = "http://www.google.com/calendar/feeds/";
     }
@@ -118,7 +116,7 @@ class ManageHelper extends HorizontalPanel {
     /**
      * Starts this demo.
      */
-    private void startDemo() {
+    private void manageCalendar() {
         service = CalendarService.newInstance(
                 "HelloGData_Calendar_CreateEventWithExtendedPropertyDemo_v2.0");
         if (User.getStatus(scope) == AuthSubStatus.LOGGED_IN) {

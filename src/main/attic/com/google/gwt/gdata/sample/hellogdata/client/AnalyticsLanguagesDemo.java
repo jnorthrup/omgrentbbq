@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 
 /**
  * The following example demonstrates how to get the top browser languages
- * in the United States for a given site.
+ * in the United States for a given citeCss.
  */
 public class AnalyticsLanguagesDemo extends GDataDemo {
 
@@ -56,7 +56,7 @@ public class AnalyticsLanguagesDemo extends GDataDemo {
       public String getDescription() {
         return "<p>This sample demonstrates how to get the top browser " +
             "languages in the United States.</p>" +
-            "<div><strong>Note:</strong>if you have no visitors to your site " +
+            "<div><strong>Note:</strong>if you have no visitors to your citeCss " +
             "from the United States, you will see no data.</div>";
       }
 

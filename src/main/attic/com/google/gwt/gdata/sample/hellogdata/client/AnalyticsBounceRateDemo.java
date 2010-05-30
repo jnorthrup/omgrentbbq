@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 
 /**
  * The following example calculates the bounce rate for the top 10
- * sources of traffic to a given site.
+ * sources of traffic to a given citeCss.
  */
 public class AnalyticsBounceRateDemo extends GDataDemo {
 

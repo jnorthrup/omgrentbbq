@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.omgrentbbq.client;
+package com.omgrentbbq.client.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,7 +21,7 @@ public class ContactCreationForm extends Composite {
     private static ContactCreationFormUiBinder uiBinder = GWT
             .create(ContactCreationFormUiBinder.class);
     private User user;
-    private AsyncCallback done;
+    private AsyncCallback<Contact> done;
 
     interface ContactCreationFormUiBinder extends
             UiBinder<Widget, ContactCreationForm> {
@@ -65,18 +65,24 @@ public class ContactCreationForm extends Composite {
     PasswordTextBox password2;
 */
 
-    public ContactCreationForm(AsyncCallback done) {
-        this.done = done;
+    public ContactCreationForm(AsyncCallback<Contact>... done) {
+        if (done.length > 0)
+            this.done = done[0];
         initWidget(uiBinder.createAndBindUi(this));
+        if (this.done == null) {
+            okButton.removeFromParent();
+            captionPanel.removeFromParent();
+        }
 
     }
 
     @UiHandler("mapButton")
     void handleLattitude(ClickEvent e) {
-    mapImage.  setUrl(
-            "http://maps.google.com/maps/api/staticmap?markers=size:small|color:red|"+address1.getText() + " "+city.getText()+" "+" , "+state.getText()+" " + zip.getText()
-                    +"&sensor=false&size=320x280"
-    ); mapImage.setVisible(true);
+        mapImage.setUrl(
+                "http://maps.google.com/maps/api/staticmap?markers=size:small|color:red|" + address1.getText() + " " + city.getText() + " " + " , " + state.getText() + " " + zip.getText()
+                        + "&sensor=false&size=320x280"
+        );
+        mapImage.setVisible(true);
 
     }
 
@@ -84,6 +90,18 @@ public class ContactCreationForm extends Composite {
     void handleOk(ClickEvent e) {
         final Contact contact = new Contact();
 
+        String s = validate(contact);
+
+        if (s.isEmpty()) {
+            contact.address2 = address2.getText();
+            done.onSuccess(contact);
+
+        } else {
+            captionPanel.setCaptionHTML(s);
+        }
+    }
+
+    public String validate(Contact contact) {
         String s = "";
         contact.name = name.getText();
         if (contact.name.length() < 3) s += "name too short<br/>";
@@ -105,14 +123,7 @@ public class ContactCreationForm extends Composite {
         if (contact.state.length() < 2) s += "state too short<br/>";
         contact.zip = zip.getText();
         if (contact.zip.length() < 5) s += "zip too short<br/>";
-
-        if (s.isEmpty()) {
-            contact.address2 = address2.getText();
-        done.onSuccess(contact);
-
-        } else {
-            captionPanel.setCaptionHTML(s);
-        }
+        return s;
     }
 
 }

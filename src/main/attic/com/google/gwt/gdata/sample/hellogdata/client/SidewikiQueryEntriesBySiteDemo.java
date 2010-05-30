@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Label;
 
 /**
  * The following example demonstrates how to query entries to find
- * Sidewiki entries for a given site.
+ * Sidewiki entries for a given citeCss.
  */
 public class SidewikiQueryEntriesBySiteDemo extends GDataDemo {
 
@@ -51,12 +51,12 @@ public class SidewikiQueryEntriesBySiteDemo extends GDataDemo {
       @Override
       public String getDescription() {
         return "<p>This sample uses an entry query to find Sidewiki content " +
-          "for a given site.</p>";
+          "for a given citeCss.</p>";
       }
 
       @Override
       public String getName() {
-        return "Sidewiki - Querying entries by site";
+        return "Sidewiki - Querying entries by citeCss";
       }
     };
   }

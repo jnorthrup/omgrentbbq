@@ -1,4 +1,4 @@
-package com.omgrentbbq.client;
+package com.omgrentbbq.client.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

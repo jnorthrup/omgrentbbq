@@ -11,26 +11,31 @@ import java.util.List;
 @SuppressWarnings({"ALL"})
 public class Payee implements Serializable {
 
-
-    PayCycle payCycle;
+    public
+    String account, nickname, fax;
+    public PayCycle payCycle;
 
     /**
      * for most PayCycle
      */
-    int[] schedule = {};
+    public int[] schedule = {};
 
     @Embed
-    Contact contact;
-    String account;
+    public Contact contact;
 
     @Child
-    List<Bill> paid = new ArrayList<Bill>();
+    public List<Bill> paid = new ArrayList<Bill>();
     @Child
-    List<Share> shares = new ArrayList<Share>();
+    public List<Share> shares = new ArrayList<Share>();
 
     @Type(com.google.appengine.api.datastore.Text.class)
+    public
     String notes;
 
     @Child
+    public
     List<String> comments = new ArrayList<String>();
+
+    public Payee() {
+    }
 }

@@ -8,7 +8,7 @@ import com.omgrentbbq.shared.model.UserSession;
 
 import java.io.Serializable;
 
-@RemoteServiceRelativePath("login")
+@RemoteServiceRelativePath("u")
 public interface LoginService extends RemoteService {
 
     UserSession login(String requestUri);

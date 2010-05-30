@@ -1,0 +1,65 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+
+        .groupBox {
+            background: #f5fffa;
+            width: 90%;
+            text-shadow: black 1px 1px 1px;
+            text-transform: capitalize;
+            font-family: fantasy;
+            font-variant: small-caps;
+            font-size: larger;
+            color: #fa8072;
+
+        }
+
+    </ui:style>
+
+    <g:HTMLPanel >
+
+        <em>click on the arrows below!</em>
+        <g:DisclosurePanel ui:field="dp1" open="false" animationEnabled="true" styleName="{style.groupBox}">
+            <g:header>Income</g:header>
+            <g:VerticalPanel>
+                <g:Button ui:field="reportIncomeButton">report new income! (yes!)</g:Button>
+            </g:VerticalPanel>
+            <!--<g:header/>-->
+        </g:DisclosurePanel>
+
+        <g:DisclosurePanel ui:field="dp2" animationEnabled="true" styleName="{style.groupBox}">
+            <g:header>Payments</g:header>
+            <g:VerticalPanel>
+                <g:Button ui:field="addPayee">add Payee</g:Button>
+                <g:Button>assign Bill to Payee</g:Button>
+                <g:Button>pay Bill</g:Button>
+                <g:Tree/>
+            </g:VerticalPanel>
+            <!--<g:header/>-->
+        </g:DisclosurePanel>
+
+
+        <g:DisclosurePanel ui:field="dp3" animationEnabled="true" open="false" stylePrimaryName="{style.groupBox}">
+            <g:header>Partnerships</g:header>
+            <g:VerticalPanel>
+                <g:Button>Create Partnership</g:Button>
+                <g:Button>assign Contact</g:Button>
+                <g:Button>assign shares</g:Button>
+                <g:Button>assign Bill to Group</g:Button>
+                <g:Button>pay Group</g:Button>
+            </g:VerticalPanel>
+        </g:DisclosurePanel>
+
+        <g:DisclosurePanel animationEnabled="true" ui:field="dp4" stylePrimaryName="{style.groupBox}">
+            <g:header>IOU's</g:header>
+            <g:VerticalPanel>
+                <g:Button>Propose IOU</g:Button>
+                <g:Button>Accept IOU</g:Button>
+                <g:Button>Pay IOU</g:Button>
+                <g:Button>Change/Remove IOU</g:Button>
+            </g:VerticalPanel>
+        </g:DisclosurePanel>
+        <g:CaptionPanel ui:field="caption"/>
+    </g:HTMLPanel>
+</ui:UiBinder>
