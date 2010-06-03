@@ -262,10 +262,13 @@ public class ManageTab extends Composite {
                 groupListBox.addItem(group.nickname);
             }
 
-            if (prevSelection != null)
-                groupListBox.setSelectedIndex(groups.indexOf(prevSelection));
 
-            if(!groups.isEmpty())payeeListUpdate();
+            if (!groups.isEmpty())
+
+            {
+                if (selectedIndex < 0) groupListBox.setSelectedIndex(0);
+                payeeListUpdate();
+            }
         }
 
     }

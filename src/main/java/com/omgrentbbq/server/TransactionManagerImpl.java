@@ -75,7 +75,12 @@ public class TransactionManagerImpl extends RemoteServiceServlet implements Tran
                 .returnResultsNow();
         final ArrayList<Payee> arrayList = new ArrayList<Payee>();
         while (payeeQueryResultIterator.hasNext()) {
-            Payee payee = payeeQueryResultIterator.next();
+            Payee payee = null;
+            try {
+                payee = payeeQueryResultIterator.next();
+            } catch (Exception e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
             arrayList.add(payee);
 
         }

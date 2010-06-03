@@ -111,17 +111,16 @@ public enum Periodicity {
         }},
     DayOfTheYear("Day of the Year") {
 
-        public int[] getSchedule(FlexTable w, CaptionPanel captionPanel, int... values) {
-            final int[] ints = super.getSchedule(w, captionPanel, values);
+        public Integer[] getSchedule(FlexTable w, CaptionPanel captionPanel, Integer... values) {
+            final Integer[] ints = super.getSchedule(w, captionPanel, values);
             if (ints != null) {
                 final int anInt = ints[0];
                 if (anInt > 365) {
                     final String s = captionPanel.getCaptionHTML();
                     captionPanel.setCaptionHTML(s + "<br/>" + scheduleOptionDescriptions[0] + " must be between 1 and 365");
-
                     return null;
                 }
-                return new int[]{anInt - 1};
+                return new Integer[]{anInt - 1};
             }
             return null;
         }
@@ -183,9 +182,9 @@ public enum Periodicity {
         }};
     }
 
-    public int[] getSchedule(FlexTable w, CaptionPanel captionPanel, int... values) {
+    public Integer[] getSchedule(FlexTable w, CaptionPanel captionPanel, Integer... values) {
 
-        int[] v = values.length > 0 ? values : new int[scheduleOptionDescriptions.length];
+        Integer[] v = values.length > 0 ? values : new Integer[scheduleOptionDescriptions.length];
 
         for (int i = 0; i < scheduleOptionDescriptions.length; i++) {
             String scheduleOptionDescription = scheduleOptionDescriptions[i];
@@ -211,8 +210,8 @@ public enum Periodicity {
         return v;
     }
 
-    public void setSchedule(FlexTable w, int... values) {
-        int[] v = values.length > 0 ? values : new int[scheduleOptionDescriptions.length];
+    public void setSchedule(FlexTable w, Integer... values) {
+        Integer[] v = values.length > 0 ? values : new Integer[scheduleOptionDescriptions.length];
 
         for (int i = 0; i < scheduleOptionDescriptions.length; i++) {
 

@@ -16,7 +16,7 @@ public class Payee implements Serializable {
     /**
      * for most Periodicity
      */
-    public int[] schedule = {};
+    public Integer[] schedule = {};
             @Key
             Long id;
     @Embed
