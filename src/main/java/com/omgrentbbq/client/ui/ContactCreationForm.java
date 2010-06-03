@@ -72,6 +72,7 @@ public class ContactCreationForm extends Composite {
         if (this.done == null) {
             okButton.removeFromParent();
             captionPanel.removeFromParent();
+            mapButton.removeFromParent();
         }
 
     }

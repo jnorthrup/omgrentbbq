@@ -1,22 +1,31 @@
 package com.omgrentbbq.shared.model;
 
+import com.vercer.engine.persist.annotation.Key;
 import com.vercer.engine.persist.annotation.Type;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-public class PayGroup implements Serializable {
+public class Group implements Serializable {
+    @Key
+    public String id;
     //for GWT this suppression and long classname are important.
     @SuppressWarnings({"NonJREEmulationClassesInClientCode"})
     @Type(com.google.appengine.api.datastore.PostalAddress.class)
     String address;
-    List<Payee> payees;
+    public String nickname;
 
-    PayGroup() {
+    public
+    List<Payee> payees = new ArrayList<Payee>();
+
+
+    public Group() {
     }
 
-    public PayGroup(String address) {
+    public Group(String address, String nickname) {
         this.address = address;
+        this.nickname = nickname;
     }
 }
 

@@ -12,14 +12,16 @@
             font-variant: small-caps;
             font-size: larger;
             color: #fa8072;
-
         }
 
     </ui:style>
 
-    <g:HTMLPanel >
+    <g:HTMLPanel>
 
-        <em>click on the arrows below!</em>
+        <em>what would you like to do?
+            <br/>
+            click on the arrows below!
+        </em>
         <g:DisclosurePanel ui:field="dp1" open="false" animationEnabled="true" styleName="{style.groupBox}">
             <g:header>Income</g:header>
             <g:VerticalPanel>
@@ -28,26 +30,36 @@
             <!--<g:header/>-->
         </g:DisclosurePanel>
 
+
+        <g:DisclosurePanel ui:field="dp3" animationEnabled="true" open="false" stylePrimaryName="{style.groupBox}">
+            <g:header>Paygroups</g:header>
+            <g:VerticalPanel>
+                <g:HorizontalPanel>
+                    <g:HTML>
+                        <em>selected Paygroup</em>
+                    </g:HTML>
+                    <g:ListBox ui:field="groupListBox" multipleSelect="false"/>
+                </g:HorizontalPanel>
+                <g:HorizontalPanel>
+                    <g:HTML>
+                        <em>Payees in this group</em>
+                    </g:HTML>
+                    <g:ListBox ui:field="payeeListBox" multipleSelect="true" visibleItemCount="4" />
+                </g:HorizontalPanel>
+                <g:Button ui:field="addPayGroup">Create Paygroup</g:Button>
+                <g:Button>assign Contact</g:Button>
+                <g:Button>assign Shares</g:Button>
+                <g:Button>assign Bill to Group</g:Button>
+                <g:Button>Pay Bills</g:Button>
+            </g:VerticalPanel>
+        </g:DisclosurePanel>
+
         <g:DisclosurePanel ui:field="dp2" animationEnabled="true" styleName="{style.groupBox}">
             <g:header>Payments</g:header>
             <g:VerticalPanel>
-                <g:Button ui:field="addPayee">add Payee</g:Button>
-                <g:Button>assign Bill to Payee</g:Button>
-                <g:Button>pay Bill</g:Button>
-                <g:Tree/>
-            </g:VerticalPanel>
-            <!--<g:header/>-->
-        </g:DisclosurePanel>
-
-
-        <g:DisclosurePanel ui:field="dp3" animationEnabled="true" open="false" stylePrimaryName="{style.groupBox}">
-            <g:header>Partnerships</g:header>
-            <g:VerticalPanel>
-                <g:Button>Create Partnership</g:Button>
-                <g:Button>assign Contact</g:Button>
-                <g:Button>assign shares</g:Button>
-                <g:Button>assign Bill to Group</g:Button>
-                <g:Button>pay Group</g:Button>
+                <g:Button ui:field="addPayee">Add Payee</g:Button>
+                <g:Button>Assign Bill to Payee</g:Button>
+                <g:Button>Pay Bill</g:Button>
             </g:VerticalPanel>
         </g:DisclosurePanel>
 

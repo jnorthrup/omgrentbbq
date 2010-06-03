@@ -19,11 +19,10 @@ import com.google.gwt.user.client.ui.*;
 import java.util.Date;
 
 /**
- * Created by IntelliJ IDEA.
+ * Copyright 2010 Glamdring Incorporated Enterprises.
  * User: jim
  * Date: May 29, 2010
  * Time: 1:19:31 AM
- * To change this template use File | Settings | File Templates.
  */
 class CreateEventUi extends HorizontalPanel {
     private CalendarService service;

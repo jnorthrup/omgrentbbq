@@ -7,16 +7,16 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.omgrentbbq.client.resources.MainBundle;
+import com.omgrentbbq.client.rpc.LoginService;
+import com.omgrentbbq.client.rpc.LoginServiceAsync;
 import com.omgrentbbq.client.ui.ContactCreationForm;
 import com.omgrentbbq.client.ui.ManageTab;
 import com.omgrentbbq.client.ui.WelcomeTab;
-import com.omgrentbbq.client.resources.MainBundle;
 import com.omgrentbbq.shared.model.Contact;
-import com.omgrentbbq.shared.model.Member;
-import com.omgrentbbq.shared.model.PayGroup;
+import com.omgrentbbq.shared.model.Group;
+import com.omgrentbbq.shared.model.Membership;
 import com.omgrentbbq.shared.model.UserSession;
-
-import java.util.Random;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -45,8 +45,6 @@ public class OmgRentBbq implements EntryPoint {
     private static final LoginServiceAsync LOGIN_SERVICE = GWT.create(LoginService.class);
     private WelcomeTab welcomeTab = new WelcomeTab();
     static String GDATA_API_KEY;
-    private static final Random RANDOM = new Random();
-    //"ABQIAAAAWpB08GH6KmKITXI7rtGRpBREGtQZq9OFJfHndXhPP8gxXzlLARRs1Zat3MllIUzN5hpmsbfnyEF7wA-OX2XYmEAa76BRl5-EVx5PbQ1VFzCJyQmfA43hlLA";
 
     public void onModuleLoad() {
         final String host = Window.Location.getHost();
@@ -128,10 +126,10 @@ public class OmgRentBbq implements EntryPoint {
     void checkUserInfoCompletion(final TabPanel tabPanel) {
 
 
-        LOGIN_SERVICE.getRenter(session.user, new AsyncCallback<Member>() {
+        LOGIN_SERVICE.getMember(session.user, new AsyncCallback<Membership>() {
             @Override
             public void onFailure(Throwable throwable) {
-                tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
+                final ContactCreationForm contactCreationForm = new ContactCreationForm(new AsyncCallback<Contact>() {
 
                     @Override
                     public void onFailure(Throwable throwable) {
@@ -141,44 +139,47 @@ public class OmgRentBbq implements EntryPoint {
                     @Override
                     public void onSuccess(final Contact contact) {
 
-                        final PayGroup payGroup = new PayGroup(contact.address1 + "|" +
+                        final Group group = new Group(contact.address1 + "|" +
                                 contact.address2 + "|" +
                                 contact.city + "|" +
                                 contact.state + "|" +
-                                contact.zip);
+                                contact.zip, contact.name + " Private Stuff");
 
+                        session.user.profile = contact;
+                        final Membership membership = new Membership(session.user, group);
 
-                        LOGIN_SERVICE.commitParentEntity(new Member(session.user, payGroup, contact), new AsyncCallback<Void>() {
+                        LOGIN_SERVICE.addUser(session, session.user, contact, membership, group, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable throwable) {
-                                Window.alert("commitParentEntity failure for Member");
+                                Window.alert("addUser failure for Membership");
+
+
                             }
 
                             @Override
                             public void onSuccess(Void aVoid) {
-
                                 tabPanel.remove(1);
                                 checkUserInfoCompletion(tabPanel);
                             }
                         });
-
                     }
-                })
+                });
+                tabPanel.add(contactCreationForm
                         , "Start now!");
                 tabPanel.selectTab(0);
             }
 
             @Override
-            public void onSuccess(final Member member) {
+            public void onSuccess(final Membership membership) {
 
 
-                final AgendaHelper helper = new AgendaHelper(  tabPanel, session);
+                final AgendaHelper helper = new AgendaHelper(tabPanel, session);
 
                 tabPanel.add(new ManageTab(helper, session), "Manage");
                 tabPanel.add(new CreateEventUi(helper), "(d)");
                 tabPanel.add(new Label("PlaceHolder"), "Groups");
                 tabPanel.add(new Label("PlaceHolder"), "Support");
-
+                tabPanel.selectTab(0);
             }
         });
 

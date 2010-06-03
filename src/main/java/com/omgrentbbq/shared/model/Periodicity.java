@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.*;
 /**
  * bill is due
  */
-public enum PayCycle {
+public enum Periodicity {
     Manual,
     Monthly("Day of the month") {
 
@@ -22,11 +22,9 @@ public enum PayCycle {
 
         public Widget createWidget(final int... features) {
             return new ListBox() {{
-                final String[] dow = {
+                for (String s : new String[]{
                         "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-                };
-                for (int i = 0; i < dow.length; i++) {
-                    String s = dow[i];
+                }) {
                     addItem(s);
                 }
                 setTitle(scheduleOptionDescriptions[0]);
@@ -115,24 +113,27 @@ public enum PayCycle {
 
         public int[] getSchedule(FlexTable w, CaptionPanel captionPanel, int... values) {
             final int[] ints = super.getSchedule(w, captionPanel, values);
-            final int anInt = ints[0];
-            if (anInt > 365) {
-                final String s = captionPanel.getCaptionHTML();
-                captionPanel.setCaptionHTML(s + "<br/>" + scheduleOptionDescriptions[0] + " must be between 1 and 365");
+            if (ints != null) {
+                final int anInt = ints[0];
+                if (anInt > 365) {
+                    final String s = captionPanel.getCaptionHTML();
+                    captionPanel.setCaptionHTML(s + "<br/>" + scheduleOptionDescriptions[0] + " must be between 1 and 365");
 
-                return new int[]{-1};
+                    return null;
+                }
+                return new int[]{anInt - 1};
             }
-            return new int[]{anInt - 1};
+            return null;
         }
         public void setSchedule(FlexTable w, int... values) {
             for (int i = 0; i < values.length; i++) {
                 int value = values[i];
 
                 TextBox widget = (TextBox) w.getWidget(i, 1);
-                widget.setText(String.valueOf(values[i]+1));
+                widget.setText(String.valueOf(values[i] + 1));
             }
         }
-     },
+    },
     DateOnEachYear("Month of the Year", "Day of the Month") {
         @Override
         public Widget createWidget(int... features) {
@@ -161,7 +162,7 @@ public enum PayCycle {
 
     public String[] scheduleOptionDescriptions;
 
-    PayCycle(String... scheduleOptionDescriptions) {
+    Periodicity(String... scheduleOptionDescriptions) {
         this.scheduleOptionDescriptions = scheduleOptionDescriptions;
     }
 
@@ -183,6 +184,7 @@ public enum PayCycle {
     }
 
     public int[] getSchedule(FlexTable w, CaptionPanel captionPanel, int... values) {
+
         int[] v = values.length > 0 ? values : new int[scheduleOptionDescriptions.length];
 
         for (int i = 0; i < scheduleOptionDescriptions.length; i++) {
@@ -196,10 +198,13 @@ public enum PayCycle {
                     TextBox textBox = (TextBox) widget;
                     v[i] = Integer.parseInt(textBox.getText());
                 } catch (NumberFormatException e) {
-                    if (captionPanel != null) captionPanel.setCaptionHTML(captionPanel.getCaptionHTML() + "<br/>" +
-                            scheduleOptionDescription + " must be a numerical value greater than 0");
+                    if (captionPanel != null) {
+                        final String s = captionPanel.getCaptionHTML() + "<br/>" +
+                                scheduleOptionDescription + " must be a numerical value greater than 0";
+                        captionPanel.setCaptionHTML(s);
+                    }
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-
+                    return null;
                 }
             }
         }
@@ -221,5 +226,5 @@ public enum PayCycle {
                 textBox.setText(String.valueOf(v[i]));
             }
         }
-     }
+    }
 }

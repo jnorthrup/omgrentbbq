@@ -21,10 +21,20 @@
         <url-pattern>/com.omgrentbbq.OmgRentBbq/tm</url-pattern>
     </servlet-mapping>
 
+   <!-- <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>rpc</web-resource-name>
+
+            <url-pattern>com.omgrentbbq.OmgRentBbq/u</url-pattern>
+            <url-pattern>com.omgrentbbq.OmgRentBbq/tm</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>-->
 
     <!-- Default page to serve -->
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
-
 </web-app>

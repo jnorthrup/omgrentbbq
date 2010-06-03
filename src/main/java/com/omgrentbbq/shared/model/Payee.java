@@ -2,6 +2,7 @@ package com.omgrentbbq.shared.model;
 
 import com.vercer.engine.persist.annotation.Child;
 import com.vercer.engine.persist.annotation.Embed;
+import com.vercer.engine.persist.annotation.Key;
 import com.vercer.engine.persist.annotation.Type;
 
 import java.io.Serializable;
@@ -10,13 +11,16 @@ import java.util.List;
 
 @SuppressWarnings({"ALL"})
 public class Payee implements Serializable {
+    @Key
+    public
+    String id;
 
     public
     String account, nickname, fax;
-    public PayCycle payCycle;
+    public Periodicity periodicity;
 
     /**
-     * for most PayCycle
+     * for most Periodicity
      */
     public int[] schedule = {};
 

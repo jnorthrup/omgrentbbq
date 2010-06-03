@@ -1,6 +1,7 @@
 package com.omgrentbbq.shared.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,5 +10,9 @@ import java.io.Serializable;
  * Time: 1:19:14 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Bill implements Serializable{
+public class Bill implements Serializable {
+    Payee payee;
+    Date recieved, due;
+    float amount;
+
 }
