@@ -62,6 +62,26 @@ public class TransactionManagerImpl extends RemoteServiceServlet implements Tran
 
     }
 
+    @Override
+    public ArrayList<Payee> getPayees(UserSession session, Group group) {
+
+        if (sessionStinks(session)) return null;
+        ObjectDatastore ds = new AnnotationObjectDatastore();
+
+        ds.associate(group);
+        final QueryResultIterator<Payee> payeeQueryResultIterator = ds.find()
+                .type(Payee.class)
+                .withAncestor(group)
+                .returnResultsNow();
+        final ArrayList<Payee> arrayList = new ArrayList<Payee>();
+        while (payeeQueryResultIterator.hasNext()) {
+            Payee payee = payeeQueryResultIterator.next();
+            arrayList.add(payee);
+
+        }
+        return arrayList;
+    }
+
     private static ArrayList<Group> innerGetGroups(UserSession session, ObjectDatastore ds) {
         final com.omgrentbbq.shared.model.User user = session.user;
         ds.associate(user);
@@ -85,15 +105,14 @@ public class TransactionManagerImpl extends RemoteServiceServlet implements Tran
 
     @Override
     public void addPayee(UserSession session, Payee payee, Group group) {
+        if (sessionStinks(session))
+            throw new Error("bad session");
+        ObjectDatastore ds =
+                new AnnotationObjectDatastore();
 
-        if (sessionStinks(session)) throw new Error("bad session");
-        ObjectDatastore ds = new AnnotationObjectDatastore();
+
         ds.associate(group);
-        group.payees.add(payee);
-
         ds.store(payee, group);
-        ds.update(group);
-
     }
 
     @Override

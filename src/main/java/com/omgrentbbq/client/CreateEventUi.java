@@ -45,7 +45,7 @@ class CreateEventUi extends HorizontalPanel {
         } else {
             manageCalendar();
         }
-        scope = "http://www.google.com/calendar/feeds/";
+        scope = "http://www.google.com/m8/feeds/ http://www.google.com/calendar/feeds/ http://maps.google.com/maps/feeds ";
     }
 
 

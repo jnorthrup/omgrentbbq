@@ -58,7 +58,7 @@ public class OmgRentBbq implements EntryPoint {
         RootPanel.get().clear();
         RootPanel.get().add(mainPanel);
         // Check login status using login service.
-        LOGIN_SERVICE.login(GWT.getHostPageBaseURL(), new AsyncCallback<UserSession>() {
+        LOGIN_SERVICE.login(Window.Location.getHref(), new AsyncCallback<UserSession>() {
             public void onFailure(Throwable error) {
             }
 

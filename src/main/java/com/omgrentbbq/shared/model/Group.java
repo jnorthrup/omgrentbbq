@@ -8,17 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Group implements Serializable {
-    @Key
-    public String id;
+                     @Key Long id;
     //for GWT this suppression and long classname are important.
     @SuppressWarnings({"NonJREEmulationClassesInClientCode"})
     @Type(com.google.appengine.api.datastore.PostalAddress.class)
     String address;
     public String nickname;
-
-    public
-    List<Payee> payees = new ArrayList<Payee>();
-
+ 
 
     public Group() {
     }

@@ -12,6 +12,7 @@ public interface TransactionManager extends RemoteService {
 
     //    Payee addPayee(UserSession session, Payee entry);
     ArrayList<Group> getGroups(UserSession session);
+    ArrayList<Payee> getPayees(UserSession session,Group group);
 
     void addPayee(UserSession session, Payee payee, Group parent);
 

@@ -27,34 +27,43 @@ public class ManageTab extends Composite {
     final UserSession session;
     private ArrayList<Group> groups;
 
-    public ManageTab(AgendaHelper helper, UserSession session) {
+    public ManageTab(AgendaHelper helper, final UserSession session) {
 
 
         this.session = session;
         this.helper = helper;
         HTMLPanel rootElement = ourUiBinder.createAndBindUi(this);
-        updateGroupList(session);
-
-        final DisclosurePanel[] disclosurePanels = {dp1, dp2, dp3, dp4};
-        for (DisclosurePanel disclosurePanel : disclosurePanels) {
-
-            disclosurePanel.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-                @Override
-                public void onOpen(OpenEvent<DisclosurePanel> e) {
-                    for (final DisclosurePanel panel : disclosurePanels) {
-                        if (e.getSource() != panel) {
-                            new Timer() {
-                                @Override
-                                public void run() {
-                                    panel.setOpen(false);
-                                }
-                            }.schedule(250);
-                        }
-                    }
-                }
-            });
-        }
         initWidget(rootElement);
+        GWT.runAsync(new RunAsyncCallback() {
+            @Override
+            public void onFailure(Throwable throwable) {
+            }
+
+            @Override
+            public void onSuccess() {
+
+                final DisclosurePanel[] disclosurePanels = {dp1, dp2, dp3, dp4};
+                for (DisclosurePanel disclosurePanel : disclosurePanels) {
+
+                    disclosurePanel.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+                        @Override
+                        public void onOpen(OpenEvent<DisclosurePanel> e) {
+                            for (final DisclosurePanel panel : disclosurePanels) {
+                                if (e.getSource() != panel) {
+                                    new Timer() {
+                                        @Override
+                                        public void run() {
+                                            panel.setOpen(false);
+                                        }
+                                    }.schedule(250);
+                                }
+                            }
+                        }
+                    });
+                }
+                updateGroupList(session);
+            }
+        });
     }
 
 
@@ -62,6 +71,7 @@ public class ManageTab extends Composite {
         TransactionManagerAsync tm = GWT.create(TransactionManager.class);
 
         tm.getGroups(session, new GroupListUpdater());
+
     }
 
     interface ManageTabUiBinder extends UiBinder<HTMLPanel, ManageTab> {
@@ -160,7 +170,6 @@ public class ManageTab extends Composite {
                 final Group[] group = {groups.get(groupListBox.getSelectedIndex())};
                 final TransactionManagerAsync lm = GWT.create(TransactionManager.class);
 
-                group[0].payees.add(payee);
 
                 lm.addPayee(session, payee, group[0], new AsyncCallback<Void>() {
                     @Override
@@ -216,7 +225,7 @@ public class ManageTab extends Composite {
 
                             @Override
                             public void onSuccess(Void aVoid) {
-                               caption.setCaptionHTML(  caption.getCaptionHTML() +
+                                caption.setCaptionHTML(caption.getCaptionHTML() +
                                         "<br/>" + "group <em>" + group.nickname + " </em> created." +
                                         "<br/>" + "<em>group associated with </em>: " + session.user.nickname);
                             }
@@ -239,10 +248,12 @@ public class ManageTab extends Composite {
 
         @Override
         public void onSuccess(ArrayList<Group> groups) {
-            Group group1 = null;
+            Group prevSelection = null;
 
-            if (groupListBox.getItemCount() > 0)
-                group1 = ManageTab.this.groups.get(groupListBox.getSelectedIndex());
+            final int selectedIndex = groupListBox.getSelectedIndex();
+            if (groupListBox.getItemCount() > 0) {
+                prevSelection = ManageTab.this.groups.get(selectedIndex);
+            }
 
 
             groupListBox.clear();
@@ -251,19 +262,37 @@ public class ManageTab extends Composite {
                 groupListBox.addItem(group.nickname);
             }
 
-            if (group1 != null)
-                groupListBox.setSelectedIndex(groups.indexOf(group1));
+            if (prevSelection != null)
+                groupListBox.setSelectedIndex(groups.indexOf(prevSelection));
+
+            if(!groups.isEmpty())payeeListUpdate();
         }
 
     }
 
+    ArrayList<Payee> payees;
+
     void payeeListUpdate() {
-        final int index = groupListBox.getSelectedIndex();
-        final Group group = groups.get(index);
+        final Group group = groups.get(groupListBox.getSelectedIndex());
 
         payeeListBox.clear();
-        for (Payee payee : group.payees) {
-            payeeListBox.addItem(payee.nickname);
+        if (group != null) {
+            TransactionManagerAsync tm = GWT.create(TransactionManager.class);
+            tm.getPayees(session, group, new AsyncCallback<ArrayList<Payee>>() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                    caption.setCaptionHTML("payee list could not be fetched, please try to reload");
+
+                }
+
+                @Override
+                public void onSuccess(ArrayList<Payee> payees) {
+                    ManageTab.this.payees = payees;
+                    for (Payee payee : payees) {
+                        payeeListBox.addItem(payee.nickname);
+                    }
+                }
+            });
         }
     }
 }

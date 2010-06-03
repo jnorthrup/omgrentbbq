@@ -27,4 +27,6 @@ public interface TransactionManagerAsync {
     void createMembership(UserSession u, User user, Group group, AsyncCallback<Void> async);
 
     void addGroup(UserSession session, Group group, AsyncCallback<Void> async);
+
+    void getPayees(UserSession session, Group group, AsyncCallback<ArrayList<Payee>> async);
 }

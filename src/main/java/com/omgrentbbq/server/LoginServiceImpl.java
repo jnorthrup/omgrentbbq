@@ -42,9 +42,7 @@ public class LoginServiceImpl extends RemoteServiceServlet implements LoginServi
             Date date = new Date(session.getCreationTime());
             UserSession userSession = new UserSession(session.getId(), date, theUser);
 
-            String s = "";
-            if (user.getEmail().endsWith("example.com")) s = "?gwt.codesvr=127.0.0.1:9997";
-            userSession.logoutUrl = userService.createLogoutURL(requestUri + s);
+            userSession.logoutUrl = userService.createLogoutURL(requestUri );
             userSession.admin = userService.isUserAdmin();
             userSession.loggedIn = userService.isUserLoggedIn();
 
