@@ -1,0 +1,21 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='res' type='com.omgrentbbq.client.resources.MainBundle'/>
+
+    <g:HTMLPanel ui:field="top">
+
+        <h1>Welcome to OmgRentBbq.com!</h1>
+
+        we want to give you the most flexible and profittable options to pay your personal bills and shared expenses
+        anywhere!
+        <ul>
+            <li>save time and money organizing household arrangements</li>
+            <li>events and parties</li>
+            <li>personal loans</li>
+            <li>establish shares and group payouts in seconds</li>
+        </ul>
+        we stand behind the guarantee to offer you simple financial conveniences with
+        <em>OUTSTANDING</em>
+        value and service.
+    </g:HTMLPanel>
+</ui:UiBinder>

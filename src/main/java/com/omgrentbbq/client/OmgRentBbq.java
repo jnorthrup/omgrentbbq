@@ -24,13 +24,13 @@ public class OmgRentBbq implements EntryPoint {
     private static final String SERVER_ERROR = "An error occurred while "
             + "attempting to contact the server. Please check your network "
             + "connection and try again.";
-    private DockPanel panel = new DockPanel();
+    DockPanel panel = new DockPanel();
     private VerticalPanel authPanel;
 
 
     static String GDATA_API_KEY;
-    private Anchor authAnchor;
-    private TabPanel tabPanel;
+    Anchor authAnchor;
+    TabPanel tabPanel = new TabPanel();
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -62,19 +62,21 @@ public class OmgRentBbq implements EntryPoint {
                 String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
                 User user = (User) userSession.properties.get("user");
+                panel.add(tabPanel, DockPanel.CENTER);
+                tabPanel.add(new HTMLPanel("placeholder"),"Welcome");
+                tabPanel.selectTab(0);
+
                 if (null != user && Boolean.valueOf(String.valueOf(userSession.properties.get("userLoggedIn")))) {
                     authAnchor.setText("not " + user.properties.get("nickname") + "? Sign Out");
 
-                    if (Boolean.valueOf(String.valueOf(userSession.properties.get("uerAdmin"))))
-                        panel.add(new Label(userSession.toString()), DockPanel.CENTER);
+                    if (Boolean.valueOf(String.valueOf(userSession.properties.get("userAdmin"))))
+                        tabPanel.add(new Label(userSession.toString()), "UserDebug");
 
                 } else {
-                    authAnchor.setText("Sign in using your google a ccount now");
+                    authAnchor.setText("Sign in using your google account now");
                 }
 
-                tabPanel = new TabPanel();
-                panel.add(tabPanel, DockPanel.CENTER);
-            }
+             }
         });
     }
 }
