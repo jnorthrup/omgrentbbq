@@ -1,42 +1,9 @@
 package com.omgrentbbq.shared.model;
 
-import com.vercer.engine.persist.annotation.*;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-@SuppressWarnings({"ALL"})
-public class Payee implements Serializable {
-
-    public
-    String account, nickname, fax;
-    public Periodicity periodicity;
-
-    /**
-     * for most Periodicity
-     */
-    public Integer[] schedule = {};
-            @Key
-            Long id;
-    @Embed
-    public Contact contact;
-    @Parent
-    Group group;
-
-    @Child
-    public List<Bill> paid = new ArrayList<Bill>();
-    @Child
-    public List<Share> shares = new ArrayList<Share>();
-
-    @Type(com.google.appengine.api.datastore.Text.class)
-    public
-    String notes;
-
-    @Child
-    public
-    List<String> comments = new ArrayList<String>();
-
-    public Payee() {
-    }
-}
+/**
+ * Copyright 2010 Glamdring Incorporated Enterprises.
+ * User: jim
+ * Date: Jun 4, 2010
+ * Time: 5:20:08 PM
+ */
+public class Payee extends Memento{}

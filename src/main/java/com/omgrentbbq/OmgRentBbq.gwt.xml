@@ -4,10 +4,11 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.resources.Resources"/>
     <inherits name='com.google.gwt.gdata.GData'/>
-    <!-- Inherit the default GWT style sheet.  You can change       -->
+     <!-- Inherit the default GWT style sheet.  You can change       -->
     <!-- the theme of your GWT application by uncommenting          -->
     <!-- any one of the following lines.                            -->
     <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+    <inherits name="com.google.gwt.rpc.RPC"/>
     <!--<inherits name='com.google.gwt.user.theme.chrome.Chrome'/>-->
     <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
@@ -23,5 +24,5 @@
     <!-- Specify the app servlets.   -->
     <!--<define-property name="user.agent" values="ie6,ie8,gecko,gecko1_8,safari,opera"/>-->
     <set-property name="user.agent" value="safari,gecko1_8"/>
-
+ 
 </module>
