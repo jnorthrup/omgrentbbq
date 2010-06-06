@@ -6,6 +6,9 @@ import com.omgrentbbq.shared.model.Memento;
 import org.apache.commons.beanutils.BeanMap;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,6 +19,10 @@ import java.util.Map;
  * Time: 10:17:53 PM
  */
 public class MementoFactory {
+    private static final String[] ACCESSORPREFIXES = new String[]{
+            "get", "is"
+    };
+//          TransformerPPP n;
 
     public static <T extends Memento> void update(final T t) {
 
@@ -35,16 +42,54 @@ public class MementoFactory {
      */
     public static <T> Map<String, Serializable> createMap(T proto) {
 
-        BeanMap map = new BeanMap(proto);
-
         LinkedHashMap<String, Serializable> hashMap = new LinkedHashMap<String, Serializable>();
-        for (Object k : map.keySet()) {
-            Object o1 = map.get(k);
-            if (o1 instanceof Serializable && !(o1 instanceof Class)) {
-                hashMap.put(k.toString(), (Serializable) o1);
+        try {
+            Map map = new BeanMap(proto);
+
+            for (Object k : map.keySet()) {
+                try {
+                    Object o1 = map.get(k);
+                    if (o1 instanceof Serializable && !(o1 instanceof Class)) {
+                        hashMap.put(k.toString(), (Serializable) o1);
+                    }
+                } catch (Exception ignored) {
+
+                }
             }
+        } catch (Throwable e) {
+            for (Method method : proto.getClass().getMethods()) {
+                final String k = method.getName();
+                for (String accessor : ACCESSORPREFIXES) {
+                    if (k.startsWith(accessor)) {
+                        try {
+                            inner(proto, hashMap, method, k, accessor);
+                        } catch (Throwable ignored) {
+                            final String message = ignored.getMessage();
+                        }
+                        finally {
+                            break;
+                        }
+                    }
+                }
+
+
+            }
+//            return hashMap;
         }
         return hashMap;
+    }
+
+    private static <T> void inner(Object proto, LinkedHashMap<String, Serializable> hashMap, Method method, String k, String accessor) throws IllegalAccessException, InvocationTargetException {
+        if (Serializable.class.isAssignableFrom(method.getReturnType())) {
+
+            Object o = method.invoke(proto);
+            if (o instanceof Serializable) {
+                Serializable serializable = (Serializable) o;
+
+                final String key = MessageFormat.format("{0}{1}", Character.toLowerCase(k.charAt(accessor.length())), k.substring(1 + accessor.length()));
+                hashMap.put(key, serializable);
+            }
+        }
     }
 
     /**
@@ -152,7 +197,7 @@ public class MementoFactory {
             } else {
                 try {
                     aClass = (Class<T>) Class.forName(entity.getKey().getKind());
-                } catch ( Exception e) {
+                } catch (Exception e) {
                     aClass = (Class<T>) Memento.class;
                 }
             }
