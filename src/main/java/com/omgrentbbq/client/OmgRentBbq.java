@@ -30,6 +30,7 @@ public class OmgRentBbq implements EntryPoint {
 
     static String GDATA_API_KEY;
     private Anchor authAnchor;
+    private TabPanel tabPanel;
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -56,16 +57,23 @@ public class OmgRentBbq implements EntryPoint {
             public void onSuccess(Pair<UserSession, String> userSessionURLPair) {
 
                 UserSession userSession = userSessionURLPair.getFirst();
-                panel.add(new Label(userSession.toString()), DockPanel.CENTER);
                 authAnchor = new Anchor();
                 panel.add(authAnchor, DockPanel.EAST);
                 String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
                 User user = (User) userSession.properties.get("user");
-                if (null != user && userSession.properties.containsKey("userLoggedIn") && Boolean.valueOf(userSession.properties.get("userLoggedIn").toString()))
+                if (null != user && Boolean.valueOf(String.valueOf(userSession.properties.get("userLoggedIn")))) {
                     authAnchor.setText("not " + user.properties.get("nickname") + "? Sign Out");
-                else
-                    authAnchor.setText("Sign in using your google account now");
+
+                    if (Boolean.valueOf(String.valueOf(userSession.properties.get("uerAdmin"))))
+                        panel.add(new Label(userSession.toString()), DockPanel.CENTER);
+
+                } else {
+                    authAnchor.setText("Sign in using your google a ccount now");
+                }
+
+                tabPanel = new TabPanel();
+                panel.add(tabPanel, DockPanel.CENTER);
             }
         });
     }

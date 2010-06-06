@@ -67,8 +67,8 @@ public class LoginImpl extends HybridServiceServlet implements Login {
 
 
         try {
-            final boolean loggedIn = service.isUserLoggedIn();
-           userSession.properties.put("userLoggedIn",loggedIn);
+            userSession.properties.put("userLoggedIn", service.isUserLoggedIn());
+            userSession.properties.put("userAdmin", service.isUserAdmin());
         } catch (Exception e) {
 
         }
