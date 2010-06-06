@@ -66,10 +66,12 @@ public class OmgRentBbq implements EntryPoint {
                 final String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
                 User user= (User) userSession.properties.get("user");
-                authAnchor.setText(
-                        (!url.contains("/_ah/logout?continue=" ))
+                if (null!=user) authAnchor.setText(
+                        "not " + user.properties.get("nickname") + "? Sign Out"
 
-                  ?"Sign in using your google account now":"not "+user.properties.get("nickname")+"? Sign Out"
+                );
+                else authAnchor.setText(
+                        "Sign in using your google account now"
 
                 );
             }
