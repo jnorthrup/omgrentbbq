@@ -17,7 +17,7 @@ public class Memento implements Serializable {
      * all purpose parent/key reference
      * might be a key or might be a pair<String,Memento > used for translating embedded fields from another Memento
      */
-    private Serializable $$;
+    public Serializable $$;
 
 
     public <T extends Serializable>T $(String k) {

@@ -1,0 +1,19 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+
+        Amount?
+        <g:TextBox ui:field="amount"/>
+        <br/>
+        Source(optional)
+        <g:TextBox ui:field="source"/>
+
+
+        <br/>
+        <g:Button ui:field="ok">OK</g:Button>
+        <g:Button ui:field="cancel">cancel</g:Button>
+        <br/>
+
+        <g:CaptionPanel ui:field="caption"/>
+    </g:HTMLPanel>
+</ui:UiBinder>

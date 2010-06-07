@@ -5,6 +5,9 @@ import com.omgrentbbq.shared.model.*;
 
 import com.google.gwt.http.client.URL;
 
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
  * User: jim
@@ -21,4 +24,11 @@ public interface LoginAsync {
 
  
     void createNewMember(User user, Contact profile, Group[] groups, AsyncCallback<Void> async);
+
+
+    void getPayeesForGroup(Serializable serializable, AsyncCallback<List<Payee>> async);
+
+
+
+    void createPayee(Group serializable, Contact contact, AsyncCallback<Payee> async);
 }

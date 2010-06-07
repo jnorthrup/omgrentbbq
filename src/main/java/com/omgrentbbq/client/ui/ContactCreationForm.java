@@ -29,6 +29,7 @@ public class ContactCreationForm extends Composite {
     }
 
     @UiField
+    public
     TextBox name;
 
 /*

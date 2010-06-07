@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.omgrentbbq.server.MementoFactory.*;
 
@@ -58,12 +59,12 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             url = service.createLoginURL(browserUrl);
         }
         final UserSession userSession = writeMemento(session, UserSession.class);
-        userSession.$.put("user", user);
+        userSession.$("user", user);
 
 
         try {
-            userSession.$.put("userLoggedIn", service.isUserLoggedIn());
-            userSession.$.put("userAdmin", service.isUserAdmin());
+            userSession.$("userLoggedIn", service.isUserLoggedIn());
+            userSession.$("userAdmin", service.isUserAdmin());
         } catch (Exception e) {
         }
         update(userSession);
@@ -105,11 +106,12 @@ public class LoginImpl extends HybridServiceServlet implements Login {
 
     @Override
     public void createNewMember(final User user, final Contact profile, Group[] groups) {
-         embed(new Pair<String, Memento>("profile", profile), user);
+        embed(new Pair<String, Memento>("profile", profile), user);
         update(user);
         if (groups.length == 0) {
-            final Group group = new Group()  ;
-            group.                $("name", profile.$("name") + "'s free private membership");
+            final Group group = new Group();
+            group.$("name", profile.$("name") + "'s free private membership");
+            group.$("immutable", true);
 
             groups = new Group[]{group};
         }
@@ -120,6 +122,35 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             final Membership membership = new Membership(user, group);
             update(membership);
         }
+    }
 
+    @Override
+    public List<Payee> getPayeesForGroup(Serializable serializable) {
+        Key key;
+        if (serializable instanceof Group) {
+            Group group = (Group) serializable;
+            key = $k(group);
+        } else {
+            key = $k(Group.class, serializable);
+
+        }
+        final Iterator<Entity> entityIterator = DS.prepare(
+                new Query(Payee.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, key)
+        ).asIterator();
+        final ArrayList<Payee> payeeArrayList = new ArrayList<Payee>();
+        while (entityIterator.hasNext()) {
+            Entity entity = entityIterator.next();
+            payeeArrayList.add($(entity, Payee.class));
+        }
+        return payeeArrayList;
+    }
+
+    @Override
+    public Payee createPayee(Group  group, Contact contact) {
+        final Payee payee = new Payee();
+        embed(new Pair<String, Memento>("contact", contact), payee);
+        payee.$("group", group);
+        update(payee); 
+        return payee ;
     }
 }
