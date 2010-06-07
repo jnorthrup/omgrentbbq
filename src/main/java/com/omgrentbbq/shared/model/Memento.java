@@ -12,23 +12,26 @@ import java.util.Map;
  * Time: 2:49:46 PM
  */
 public class Memento implements Serializable{
-    private Serializable key;
+    private Serializable $$;
 
 
+    public <T extends Serializable> T $(String $$){
+        return (T) $.get($$);
+    }
 
     public String getType() {
         return getClass().getName();
     }
 
-    public Map<String, Serializable> properties =
+    public Map<String, Serializable> $ =
             new LinkedHashMap<String, Serializable>();
 
     @Override
     public String toString() {
         final String[] strings = getClass().getName().split("\\.");
         return strings[strings.length-1] +"{" +
-                "key=" + getKey() +
-                ", properties=" + properties +
+                "$$=" + $$() +
+                ", $=" + $ +
                 '}';
     }
 
@@ -39,25 +42,23 @@ public class Memento implements Serializable{
 
         Memento memento = (Memento) o;
 
-        if (getKey() != null ? !getKey().equals(memento.getKey()) : memento.getKey() != null) return false;
-        if (properties != null ? !properties.equals(memento.properties) : memento.properties != null) return false;
+        return !($$() != null ? !$$().equals(memento.$$()) : memento.$$() != null) && !($ != null ? !$.equals(memento.$) : memento.$ != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = getKey() != null ? getKey().hashCode() : 0;
-        result = 31 * result + (properties != null ? properties.hashCode() : 0);
+        int result = $$() != null ? $$().hashCode() : 0;
+        result = 31 * result + ($ != null ? $.hashCode() : 0);
         return result;
     }
 
-    public Serializable getKey() {
-        return key;
+    public Serializable $$() {
+        return $$;
     }
 
-    public void setKey(Serializable key) {
-        this.key = key;
+    public void $$(Serializable $$) {
+        this.$$ = $$;
     }
 }
 

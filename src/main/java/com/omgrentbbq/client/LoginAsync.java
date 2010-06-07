@@ -1,6 +1,7 @@
 package com.omgrentbbq.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.omgrentbbq.shared.model.Group;
 import com.omgrentbbq.shared.model.Pair;
 import com.omgrentbbq.shared.model.User;
 import com.omgrentbbq.shared.model.UserSession;
@@ -17,4 +18,6 @@ public interface LoginAsync {
 
  
     void getUserSession(String browserUrl, AsyncCallback<Pair<UserSession, String>> async);
+
+    void getGroups(User user, AsyncCallback<Group[]> async);
 }

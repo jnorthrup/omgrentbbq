@@ -59,7 +59,7 @@ public class FinanceCreateTransactionDemo extends GDataDemo {
             "A new transaction is created in a user's Google Finance " +
             "portfolio by posting a transaction entry to the appropriate " +
             "Post URL. In this example, a transaction entry object is " +
-            "created and its properties (transaction type, etc.) are " +
+            "created and its $ (transaction type, etc.) are " +
             "set, then the portfolio feed is queried for a list of the " +
             "user's portfolios. The entry is inserted into the portfolio " +
             "whose title starts with 'GWT-Finance-Client'.</p>";

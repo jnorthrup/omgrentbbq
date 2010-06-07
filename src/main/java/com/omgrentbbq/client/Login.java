@@ -2,11 +2,10 @@ package com.omgrentbbq.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.omgrentbbq.shared.model.Group;
 import com.omgrentbbq.shared.model.Pair;
 import com.omgrentbbq.shared.model.User;
 import com.omgrentbbq.shared.model.UserSession;
-
-import com.google.gwt.http.client.URL;
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -16,11 +15,8 @@ import com.google.gwt.http.client.URL;
  */
 @RemoteServiceRelativePath("user")
 public interface Login extends RemoteService {
+    public Pair<UserSession, String> getUserSession(String browserUrl);
 
-
-  
-
-    public Pair<UserSession, String> getUserSession(String browserUrl) ;
-
+    public Group[] getGroups(User user);
 
 }

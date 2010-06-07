@@ -1,21 +1,17 @@
 package com.omgrentbbq.server;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.HybridServiceServlet;
 import com.omgrentbbq.client.Login;
-import com.omgrentbbq.shared.model.Pair;
-import com.omgrentbbq.shared.model.User;
-import com.omgrentbbq.shared.model.UserSession;
+import com.omgrentbbq.shared.model.*;
 
 import javax.servlet.http.HttpSession;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import static com.omgrentbbq.server.MementoFactory.*;
 
@@ -26,6 +22,7 @@ import static com.omgrentbbq.server.MementoFactory.*;
  * Time: 2:44:03 PM
  */
 public class LoginImpl extends HybridServiceServlet implements Login {
+    private static final DatastoreService DS = DatastoreServiceFactory.getDatastoreService();
 
 
     @Override
@@ -33,7 +30,6 @@ public class LoginImpl extends HybridServiceServlet implements Login {
 
 
         HttpSession session = getThreadLocalRequest().getSession(true);
-        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         UserService service = UserServiceFactory.getUserService();
 
         com.google.appengine.api.users.User sysuser = service.getCurrentUser();
@@ -42,7 +38,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         if (null != sysuser) {
             try {
 
-                Entity entity = ds.get($k(User.class, sysuser.getUserId()));
+                Entity entity = DS.get($k(User.class, sysuser.getUserId()));
 
                 user = $(entity);
                 update(user);
@@ -63,19 +59,49 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             url = service.createLoginURL(browserUrl);
         }
         final UserSession userSession = writeMemento(session, UserSession.class);
-        userSession.properties.put("user", user);
+        userSession.$.put("user", user);
 
 
         try {
-            userSession.properties.put("userLoggedIn", service.isUserLoggedIn());
-            userSession.properties.put("userAdmin", service.isUserAdmin());
+            userSession.$.put("userLoggedIn", service.isUserLoggedIn());
+            userSession.$.put("userAdmin", service.isUserAdmin());
         } catch (Exception e) {
 
         }
-//        userSession.properties.putAll(map);
+//        userSession.$.putAll(map);
         update(userSession);
 
 
         return new Pair<UserSession, String>(userSession, url);
+    }
+
+    @Override
+    public Group[] getGroups(User user) {
+        final Key key = $k(user);
+        new Query(Membership.class.getName())
+                . addFilter("user", Query.FilterOperator.EQUAL, key);
+        final Iterator<Entity> entityIterator = DS.prepare(
+                new Query(Membership.class.getName())
+                        .addFilter("user", Query.FilterOperator.EQUAL, key)
+        ).asIterator();
+        final ArrayList<Group> a = new ArrayList<Group>();
+        while (entityIterator.hasNext()) {
+            Entity entity = entityIterator.next();
+            final Membership membership = $(entity, Membership.class);
+            final Serializable group = membership.getGroup();
+
+            try {
+                if (group instanceof Key) {
+                    Key key1 = (Key) group;
+                  Group g=$(DS.get( key1));
+                    a.add (g)              ;
+                }
+            } catch (EntityNotFoundException ignored) {
+            }
+
+        }
+
+        return new Group[0];
+
     }
 }

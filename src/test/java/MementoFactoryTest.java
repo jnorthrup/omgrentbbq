@@ -66,11 +66,11 @@ public class MementoFactoryTest extends TestCase {
 
         final MockUserMemento memento = MementoFactory.writeMemento(new MockUser(), MockUserMemento.class);
 
-        final Serializable serializable = memento.getKey();
+        final Serializable serializable = memento.$$();
         final long aLong = LONG;
         assertEquals(serializable, aLong);
-        assertEquals(memento.properties.get("x"), "x");
-        assertEquals(memento.properties.size(), 1);
+        assertEquals(memento.$.get("x"), "x");
+        assertEquals(memento.$.size(), 1);
 
     }
 
@@ -87,10 +87,10 @@ public class MementoFactoryTest extends TestCase {
         final Entity entity = new Entity("MockuserMemento");
         entity.setProperty("x", "!x");
         final Memento memento = MementoFactory.$(entity, MockUserMemento.class);
-        assertNull(memento.properties.get("theSpecialId"));
-        assertFalse(memento.properties.get("x").equals("x"));
-        assertEquals(memento.properties.get("x"),("!x"));
-        assertEquals(memento.properties.size(), 1);
+        assertNull(memento.$.get("theSpecialId"));
+        assertFalse(memento.$.get("x").equals("x"));
+        assertEquals(memento.$.get("x"),("!x"));
+        assertEquals(memento.$.size(), 1);
 
     }
 }

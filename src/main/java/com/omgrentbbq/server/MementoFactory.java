@@ -29,7 +29,7 @@ public class MementoFactory {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
         Key key = ds.put($(t));
-        assert (key.getName() == null ? key.getId() : key.getName()).equals(t.getKey());
+        assert (key.getName() == null ? key.getId() : key.getName()).equals(t.$$());
 
     }
 
@@ -132,13 +132,13 @@ public class MementoFactory {
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         Key key1 = ds.put(entity);
         if (!key1.equals(key)) {
-            memento.setKey(key1.getName() == null ? key1.getId() : key1.getName());
+            memento.$$(key1.getName() == null ? key1.getId() : key1.getName());
         }
         return (T) memento;
     }
 
     public static <T extends Memento> Key $k(T m) {
-        Serializable serializable = m.getKey();
+        Serializable serializable = m.$$();
         Key key;
         if (serializable instanceof Long) {
             long aLong = (Long) serializable;
@@ -166,8 +166,8 @@ public class MementoFactory {
 
     private static <T extends Memento> Entity $(T t) {
         Entity entity = new Entity($k(t));
-        for (String s : t.properties.keySet()) {
-            Serializable serializable = t.properties.get(s);
+        for (String s : t.$.keySet()) {
+            Serializable serializable = t.$.get(s);
             if (serializable instanceof Memento) {
                 Memento memento = (Memento) serializable;
                 entity.setProperty(s, $k(memento));
@@ -209,36 +209,36 @@ public class MementoFactory {
                 Object o = map.get(k);
                 if (!(o instanceof Class)) {
                     if (k.equals(keyProperty)) {
-                        t.setKey((Serializable) o);
+                        t.$$((Serializable) o);
                     } else {
                         if (o instanceof Memento) {
                             Memento memento = (Memento) o;
-                            t.properties.put(k, $k(memento));
+                            t.$.put(k, $k(memento));
 
                         } else if (o instanceof Key) {
                             Key key = (Key) o;
 
                             try {
                                 Entity e = DatastoreServiceFactory.getDatastoreService().get(key);
-                                t.properties.put(k, $(e, (Class<? extends Memento>) Class.forName(key.getKind())));
+                                t.$.put(k, $(e, (Class<? extends Memento>) Class.forName(key.getKind())));
                             } catch (Exception e) {
-                                t.properties.put(k, key);
+                                t.$.put(k, key);
                             }
                         } else {
-                            t.properties.put(k, (Serializable) o);
+                            t.$.put(k, (Serializable) o);
                         }
                     }
 
                 }
             }
             if (null != keyProperty) {
-                t.properties.remove(keyProperty.value());
+                t.$.remove(keyProperty.value());
             }
         } catch (Exception ignored) {
         }
         Key key = entity.getKey();
-        if (null == t.getKey()) {
-            t.setKey(key.getName() == null ? key.getId() : key.getName());
+        if (null == t.$$()) {
+            t.$$(key.getName() == null ? key.getId() : key.getName());
         }
         return t;
     }

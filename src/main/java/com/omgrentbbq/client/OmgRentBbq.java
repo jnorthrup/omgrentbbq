@@ -7,6 +7,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
+import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.shared.model.Pair;
 import com.omgrentbbq.shared.model.User;
 import com.omgrentbbq.shared.model.UserSession;
@@ -61,22 +62,19 @@ public class OmgRentBbq implements EntryPoint {
                 panel.add(authAnchor, DockPanel.EAST);
                 String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
-                User user = (User) userSession.properties.get("user");
+                User user = (User) userSession.$("user");
                 panel.add(tabPanel, DockPanel.CENTER);
-                tabPanel.add(new HTMLPanel("placeholder"),"Welcome");
+                tabPanel.add(new WelcomeTab(), "Welcome!");
                 tabPanel.selectTab(0);
 
-                if (null != user && Boolean.valueOf(String.valueOf(userSession.properties.get("userLoggedIn")))) {
-                    authAnchor.setText("not " + user.properties.get("nickname") + "? Sign Out");
-
-                    if (Boolean.valueOf(String.valueOf(userSession.properties.get("userAdmin"))))
-                        tabPanel.add(new Label(userSession.toString()), "UserDebug");
-
-                } else {
+                if (null == user || !Boolean.valueOf(String.valueOf(userSession.$("userLoggedIn")))) {
                     authAnchor.setText("Sign in using your google account now");
+                } else {
+                    authAnchor.setText("not " + user.$("nickname") + "? Sign Out");
+                    if (userSession.isUserAdmin())
+                        panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
                 }
-
-             }
+            }
         });
     }
 }
