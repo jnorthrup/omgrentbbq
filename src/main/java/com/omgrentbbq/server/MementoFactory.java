@@ -7,9 +7,6 @@ import com.omgrentbbq.shared.model.Pair;
 import org.apache.commons.beanutils.BeanMap;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -23,15 +20,14 @@ public class MementoFactory {
     private static final String[] ACCESSORPREFIXES = new String[]{
             "get", "is"
     };
-//          TransformerPPP n;
 
     public static <T extends Memento> void update(final T t) {
 
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 
-        Key key = ds.put($(t));
-        assert (key.getName() == null ? key.getId() : key.getName()).equals(t.$$());
-
+        final Entity entity = $(t);
+        Key key = ds.put(entity);
+        t.$$(key.getName() == null ? key.getId() : key.getName());
     }
 
     /**
@@ -115,7 +111,7 @@ public class MementoFactory {
             long aLong = (Long) serializable;
             key = KeyFactory.createKey(m.getType(), (long) aLong);
         } else {
-            key = KeyFactory.createKey(m.getType(), String.valueOf(serializable));
+            key = KeyFactory.createKey(m.getType(), (String) serializable);
         }
         return key;
     }
@@ -136,7 +132,12 @@ public class MementoFactory {
     }
 
     private static <T extends Memento> Entity $(T t) {
-        Entity entity = new Entity($k(t));
+        Entity entity;
+        if (null != t.$$())
+
+            entity = new Entity($k(t));
+        else
+            entity = new Entity(t.getClass().getName());
         for (String s : t.$.keySet()) {
             Serializable serializable = t.$(s);
             if (serializable instanceof Memento) {
@@ -185,7 +186,6 @@ public class MementoFactory {
                         if (o instanceof Memento) {
                             Memento memento = (Memento) o;
                             t.$(k, $k(memento));
-
                         } else if (o instanceof Key) {
                             Key key = (Key) o;
 
@@ -214,13 +214,13 @@ public class MementoFactory {
         return t;
     }
 
-    public static void embed(Pair<String,? extends Memento > src,Memento into){
+    public static void embed(Pair<String, ? extends Memento> src, Memento into) {
         final String as = src.getFirst();
         final Memento from = src.getSecond();
-        for (String k: from.$.keySet()) {
-            into.$(as +"/"+k, from.$(k));
+        for (String k : from.$.keySet()) {
+            into.$(as + "." + k, from.$(k));
         }
-        from.$$(new Pair(as,into));
+        from.$$(new Pair(as, into));
     }
 
 }

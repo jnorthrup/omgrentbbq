@@ -23,7 +23,7 @@ public class Memento implements Serializable {
     public <T extends Serializable>T $(String k) {
         if ($$ instanceof Pair) {
             Pair<String,   Memento> pair = (Pair<String,   Memento>) $$;
-            return (T)pair.getSecond().$(pair.getFirst() + "/" + k);
+            return (T)pair.getSecond().$(pair.getFirst() + "." + k);
         } else
             return (T) $.get(k);
     }
@@ -31,7 +31,7 @@ public class Memento implements Serializable {
     public <T extends Serializable> T $(String k,Serializable t) {
         if ($$ instanceof Pair) {
             Pair<String,  Memento> pair = (Pair<String,  Memento>) $$;
-            return (T)pair.getSecond().$(pair.getFirst() + "/" + k, t);
+            return (T)pair.getSecond().$(pair.getFirst() + "." + k, t);
         } else
             return (T) $.put(k, t);
     }

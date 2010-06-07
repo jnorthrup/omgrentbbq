@@ -33,7 +33,9 @@ public class OmgRentBbq implements EntryPoint {
 
     static String GDATA_API_KEY;
     Anchor authAnchor;
-    TabPanel tabPanel = new TabPanel();
+    TabPanel tabPanel = new TabPanel() {{
+        setAnimationEnabled(true);
+    }};
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -98,14 +100,26 @@ public class OmgRentBbq implements EntryPoint {
                                         tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
                                             @Override
                                             public void onFailure(Throwable throwable) {
-                                             }
+                                            }
 
                                             @Override
                                             public void onSuccess(Contact contact) {
-                                             }
+                                                lm.createNewMember(user, contact, new Group[0], new AsyncCallback<Void>() {
+                                                    @Override
+                                                    public void onFailure(Throwable throwable) {
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        tabPanel.remove(1);
+                                                        GWT.runAsync(new MyRunAsyncCallback());
+                                                    }
+                                                });
+
+                                            }
                                         }), "Sign Up Free!");
                                     } else {
-                                        tabPanel.add(new Label("Placeholder"),"Manage Groups");    
+                                        GWT.runAsync(new MyRunAsyncCallback());
 
                                     }
                                 }
@@ -113,10 +127,23 @@ public class OmgRentBbq implements EntryPoint {
                             if (userSession.isUserAdmin())
                                 panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
                         }
-                    });  
+                    });
                 }
             }
         });
+    }
+
+    private class MyRunAsyncCallback implements RunAsyncCallback {
+        @Override
+        public void onFailure(Throwable throwable) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void onSuccess() {
+            tabPanel.add(new Label("Placeholder"), "Manage Groups");
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
     }
 }
 

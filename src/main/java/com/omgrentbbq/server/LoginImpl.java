@@ -92,7 +92,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
                 try {
                     if (group instanceof Key) {
                         Key key1 = (Key) group;
-                        Group g = $(DS.get(key1));
+                        Group g = $(DS.get(key1), Group.class);
                         a.add(g);
                     }
                 } catch (EntityNotFoundException ignored) {
@@ -104,16 +104,15 @@ public class LoginImpl extends HybridServiceServlet implements Login {
     }
 
     @Override
-    public void createNewMember(final User user, Contact profile, Group[] groups) {
-        MementoFactory.embed(new Pair<String, Memento>("profile", profile), user);
+    public void createNewMember(final User user, final Contact profile, Group[] groups) {
+         embed(new Pair<String, Memento>("profile", profile), user);
         update(user);
-        if (groups.length == 0)
-            groups = new Group[]{new Group() {{
+        if (groups.length == 0) {
+            final Group group = new Group()  ;
+            group.                $("name", profile.$("name") + "'s free private membership");
 
-                $("name", user.$("nickname") + "'s free private membership");
-
-
-            }}};
+            groups = new Group[]{group};
+        }
 
         MementoFactory.update(user);
         for (Group group : groups) {
