@@ -9,6 +9,14 @@ import java.io.Serializable;
  * Time: 5:20:14 PM
  */
 public class Membership extends Memento {
+    public Membership() {
+    }
+
+    public Membership(User user, Group group) {
+        $("user", user);
+        $("group", group);
+    }
+
     public Serializable getGroup() {
         return $("group");
     }

@@ -3,6 +3,7 @@ package com.omgrentbbq.server;
 import com.google.appengine.api.datastore.*;
 import com.omgrentbbq.shared.model.KeyProperty;
 import com.omgrentbbq.shared.model.Memento;
+import com.omgrentbbq.shared.model.Pair;
 import org.apache.commons.beanutils.BeanMap;
 
 import java.io.Serializable;
@@ -56,41 +57,11 @@ public class MementoFactory {
 
                 }
             }
-        } catch (Throwable e) {
-            for (Method method : proto.getClass().getMethods()) {
-                final String k = method.getName();
-                for (String accessor : ACCESSORPREFIXES) {
-                    if (k.startsWith(accessor)) {
-                        try {
-                            inner(proto, hashMap, method, k, accessor);
-                        } catch (Throwable ignored) {
-                            final String message = ignored.getMessage();
-                        }
-                        finally {
-                            break;
-                        }
-                    }
-                }
-
-
-            }
-//            return hashMap;
+        } finally {
         }
         return hashMap;
     }
 
-    private static <T> void inner(Object proto, LinkedHashMap<String, Serializable> hashMap, Method method, String k, String accessor) throws IllegalAccessException, InvocationTargetException {
-        if (Serializable.class.isAssignableFrom(method.getReturnType())) {
-
-            Object o = method.invoke(proto);
-            if (o instanceof Serializable) {
-                Serializable serializable = (Serializable) o;
-
-                final String key = MessageFormat.format("{0}{1}", Character.toLowerCase(k.charAt(accessor.length())), k.substring(1 + accessor.length()));
-                hashMap.put(key, serializable);
-            }
-        }
-    }
 
     /**
      * this creates a new Entity in the ds and returns a memento of it overloaded to use newInstance
@@ -142,9 +113,9 @@ public class MementoFactory {
         Key key;
         if (serializable instanceof Long) {
             long aLong = (Long) serializable;
-            key = KeyFactory.createKey(m.getClass().getName(), (long) aLong);
+            key = KeyFactory.createKey(m.getType(), (long) aLong);
         } else {
-            key = KeyFactory.createKey(m.getClass().getName(), String.valueOf(serializable));
+            key = KeyFactory.createKey(m.getType(), String.valueOf(serializable));
         }
         return key;
     }
@@ -167,7 +138,7 @@ public class MementoFactory {
     private static <T extends Memento> Entity $(T t) {
         Entity entity = new Entity($k(t));
         for (String s : t.$.keySet()) {
-            Serializable serializable = t.$.get(s);
+            Serializable serializable = t.$(s);
             if (serializable instanceof Memento) {
                 Memento memento = (Memento) serializable;
                 entity.setProperty(s, $k(memento));
@@ -196,7 +167,7 @@ public class MementoFactory {
                 aClass = optionalClass[0];
             } else {
                 try {
-                    aClass = (Class<T>) Class.forName(entity.getKey().getKind());
+                    aClass = (Class<T>) Class.forName(Memento.class.getPackage().getName() + '.' + entity.getKey().getKind());
                 } catch (Exception e) {
                     aClass = (Class<T>) Memento.class;
                 }
@@ -213,19 +184,19 @@ public class MementoFactory {
                     } else {
                         if (o instanceof Memento) {
                             Memento memento = (Memento) o;
-                            t.$.put(k, $k(memento));
+                            t.$(k, $k(memento));
 
                         } else if (o instanceof Key) {
                             Key key = (Key) o;
 
                             try {
                                 Entity e = DatastoreServiceFactory.getDatastoreService().get(key);
-                                t.$.put(k, $(e, (Class<? extends Memento>) Class.forName(key.getKind())));
+                                t.$(k, $(e, (Class<? extends Memento>) Class.forName(key.getKind())));
                             } catch (Exception e) {
-                                t.$.put(k, key);
+                                t.$(k, key);
                             }
                         } else {
-                            t.$.put(k, (Serializable) o);
+                            t.$(k, (Serializable) o);
                         }
                     }
 
@@ -242,4 +213,14 @@ public class MementoFactory {
         }
         return t;
     }
+
+    public static void embed(Pair<String,? extends Memento > src,Memento into){
+        final String as = src.getFirst();
+        final Memento from = src.getSecond();
+        for (String k: from.$.keySet()) {
+            into.$(as +"/"+k, from.$(k));
+        }
+        from.$$(new Pair(as,into));
+    }
+
 }

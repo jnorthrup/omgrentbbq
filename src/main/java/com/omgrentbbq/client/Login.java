@@ -2,10 +2,7 @@ package com.omgrentbbq.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.omgrentbbq.shared.model.Group;
-import com.omgrentbbq.shared.model.Pair;
-import com.omgrentbbq.shared.model.User;
-import com.omgrentbbq.shared.model.UserSession;
+import com.omgrentbbq.shared.model.*;
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -19,4 +16,6 @@ public interface Login extends RemoteService {
 
     public Group[] getGroups(User user);
 
+
+    void createNewMember(User user,Contact profile, Group[] groups);
 }

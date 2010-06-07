@@ -3,14 +3,16 @@ package com.omgrentbbq.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
+import com.omgrentbbq.client.ui.ContactCreationForm;
 import com.omgrentbbq.client.ui.WelcomeTab;
-import com.omgrentbbq.shared.model.Pair;
-import com.omgrentbbq.shared.model.User;
-import com.omgrentbbq.shared.model.UserSession;
+import com.omgrentbbq.shared.model.*;
+
+import java.util.Arrays;
 
 
 /**
@@ -46,7 +48,7 @@ public class OmgRentBbq implements EntryPoint {
         panel.add(new Image(MainBundle.INSTANCE.logo()), DockPanel.WEST);
         RootPanel rootPanel = RootPanel.get("main");
         rootPanel.add(panel);
-        LoginAsync lm = GWT.create(Login.class);
+        final LoginAsync lm = GWT.create(Login.class);
 
         lm.getUserSession(Window.Location.getHref(), new AsyncCallback<Pair<UserSession, String>>() {
             @Override
@@ -57,12 +59,12 @@ public class OmgRentBbq implements EntryPoint {
             @Override
             public void onSuccess(Pair<UserSession, String> userSessionURLPair) {
 
-                UserSession userSession = userSessionURLPair.getFirst();
+                final UserSession userSession = userSessionURLPair.getFirst();
                 authAnchor = new Anchor();
                 panel.add(authAnchor, DockPanel.EAST);
                 String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
-                User user = (User) userSession.$("user");
+                final User user = (User) userSession.$("user");
                 panel.add(tabPanel, DockPanel.CENTER);
                 tabPanel.add(new WelcomeTab(), "Welcome!");
                 tabPanel.selectTab(0);
@@ -71,8 +73,47 @@ public class OmgRentBbq implements EntryPoint {
                     authAnchor.setText("Sign in using your google account now");
                 } else {
                     authAnchor.setText("not " + user.$("nickname") + "? Sign Out");
-                    if (userSession.isUserAdmin())
-                        panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
+
+                    GWT.runAsync(new RunAsyncCallback() {
+                        @Override
+                        public void onFailure(Throwable throwable) {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+
+                        @Override
+                        public void onSuccess() {
+
+                            lm.getGroups(user, new AsyncCallback<Group[]>() {
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                    //To change body of implemented methods use File | Settings | File Templates.
+                                }
+
+                                @Override
+                                public void onSuccess(final Group[] groups) {
+
+                                    if (userSession.isUserAdmin())
+                                        panel.add(new Label(Arrays.toString(groups)), DockPanel.SOUTH);
+                                    if (groups.length == 0) {
+                                        tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
+                                            @Override
+                                            public void onFailure(Throwable throwable) {
+                                             }
+
+                                            @Override
+                                            public void onSuccess(Contact contact) {
+                                             }
+                                        }), "Sign Up Free!");
+                                    } else {
+                                        tabPanel.add(new Label("Placeholder"),"Manage Groups");    
+
+                                    }
+                                }
+                            });
+                            if (userSession.isUserAdmin())
+                                panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
+                        }
+                    });  
                 }
             }
         });

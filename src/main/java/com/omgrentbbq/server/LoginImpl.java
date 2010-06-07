@@ -8,7 +8,6 @@ import com.omgrentbbq.client.Login;
 import com.omgrentbbq.shared.model.*;
 
 import javax.servlet.http.HttpSession;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,7 +39,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
 
                 Entity entity = DS.get($k(User.class, sysuser.getUserId()));
 
-                user = $(entity);
+                user = $(entity, User.class);
                 update(user);
                 if (!service.isUserLoggedIn()) {
                     url = service.createLoginURL(browserUrl);
@@ -66,9 +65,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             userSession.$.put("userLoggedIn", service.isUserLoggedIn());
             userSession.$.put("userAdmin", service.isUserAdmin());
         } catch (Exception e) {
-
         }
-//        userSession.$.putAll(map);
         update(userSession);
 
 
@@ -78,30 +75,52 @@ public class LoginImpl extends HybridServiceServlet implements Login {
     @Override
     public Group[] getGroups(User user) {
         final Key key = $k(user);
+        final ArrayList<Group> a = new ArrayList<Group>();
         new Query(Membership.class.getName())
-                . addFilter("user", Query.FilterOperator.EQUAL, key);
+                .addFilter("user", Query.FilterOperator.EQUAL, key);
         final Iterator<Entity> entityIterator = DS.prepare(
                 new Query(Membership.class.getName())
                         .addFilter("user", Query.FilterOperator.EQUAL, key)
         ).asIterator();
-        final ArrayList<Group> a = new ArrayList<Group>();
         while (entityIterator.hasNext()) {
             Entity entity = entityIterator.next();
             final Membership membership = $(entity, Membership.class);
             final Serializable group = membership.getGroup();
-
-            try {
-                if (group instanceof Key) {
-                    Key key1 = (Key) group;
-                  Group g=$(DS.get( key1));
-                    a.add (g)              ;
+            if (group instanceof Group) {
+                a.add((Group) group);
+            } else
+                try {
+                    if (group instanceof Key) {
+                        Key key1 = (Key) group;
+                        Group g = $(DS.get(key1));
+                        a.add(g);
+                    }
+                } catch (EntityNotFoundException ignored) {
                 }
-            } catch (EntityNotFoundException ignored) {
-            }
-
         }
 
-        return new Group[0];
+        return a.toArray(new Group[a.size()]);
+
+    }
+
+    @Override
+    public void createNewMember(final User user, Contact profile, Group[] groups) {
+        MementoFactory.embed(new Pair<String, Memento>("profile", profile), user);
+        update(user);
+        if (groups.length == 0)
+            groups = new Group[]{new Group() {{
+
+                $("name", user.$("nickname") + "'s free private membership");
+
+
+            }}};
+
+        MementoFactory.update(user);
+        for (Group group : groups) {
+            update(group);
+            final Membership membership = new Membership(user, group);
+            update(membership);
+        }
 
     }
 }
