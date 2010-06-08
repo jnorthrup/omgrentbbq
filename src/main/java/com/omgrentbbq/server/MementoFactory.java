@@ -10,10 +10,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -22,9 +19,16 @@ import java.util.Map;
  * Time: 10:17:53 PM
  */
 public class MementoFactory {
+
+    static {
+        // eventually consistent reads
+
+
+    }
     private static final String[] ACCESSORPREFIXES = new String[]{
             "get", "is"
     };
+    private static final DatastoreServiceConfig config = DatastoreServiceConfig .Builder.withReadPolicy(new ReadPolicy(ReadPolicy.Consistency.STRONG));
 
     public static <T extends Memento> void update(final T t) {
 
@@ -145,8 +149,10 @@ public class MementoFactory {
             entity = new Entity(t.getClass().getName());
         for (String nkey : t.$.keySet()) {
             Serializable serializable = t.$(nkey);
-            if (serializable instanceof Object[]) {
-                entity.setProperty(nkey, Arrays.asList(serializable));
+            if (serializable.getClass().isArray()) {
+                final Class<? extends Serializable> type = (Class<? extends Serializable>) serializable.getClass().getComponentType();
+
+                entity.setProperty(nkey, listifyArray(serializable, type));
             } else if (serializable instanceof Enum) {
                 Enum anEnum = (Enum) serializable;
                 entity.setProperty(nkey, anEnum.name());
@@ -161,6 +167,11 @@ public class MementoFactory {
 
         }
         return entity;
+    }
+
+    public static <T extends Serializable> List<T> listifyArray(Serializable ser, Class<T> type) {
+        T[] ar = (T[]) ser;
+        return new ArrayList<T>(Arrays.asList(ar));
     }
 
     /**
@@ -239,7 +250,7 @@ public class MementoFactory {
         return t;
     }
 
-     public static <T extends Memento, X extends Serializable> Object[] listToArray(List list, Class<X> type) {
+    public static <T extends Memento, X extends Serializable> Object[] listToArray(List list, Class<X> type) {
         X[] theArray = (X[]) Array.newInstance(type, list.size());
 
         if (!Number.class.isAssignableFrom(type)) {

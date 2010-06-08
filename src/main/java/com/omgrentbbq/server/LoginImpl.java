@@ -22,7 +22,8 @@ import static com.omgrentbbq.server.MementoFactory.*;
  * Time: 2:44:03 PM
  */
 public class LoginImpl extends HybridServiceServlet implements Login {
-    private static final DatastoreService DS = DatastoreServiceFactory.getDatastoreService();
+    private static final DatastoreServiceConfig config = DatastoreServiceConfig.Builder.withReadPolicy(new ReadPolicy(ReadPolicy.Consistency.STRONG));
+    private static final DatastoreService DS = DatastoreServiceFactory.getDatastoreService(config);
 
 
     @Override
@@ -46,9 +47,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
                     url = service.createLoginURL(browserUrl);
                 } else {
                     url = service.createLogoutURL(browserUrl);
-                }
-
-
+                } 
             } catch (EntityNotFoundException ignored) {
 
                 user = MementoFactory.writeMemento(sysuser, User.class);
@@ -149,7 +148,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
     public Payee addPayeeForGroup(Payee payee, Group group) {
 
         payee.$("group", group);
-        update(payee); 
-        return payee ;
+        update(payee);
+        return payee;
     }
 }

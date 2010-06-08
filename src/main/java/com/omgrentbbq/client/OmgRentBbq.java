@@ -38,13 +38,15 @@ public class OmgRentBbq implements EntryPoint {
     private VerticalPanel authPanel;
 
 
+    final ListBox groupList = new ListBox();
     static String GDATA_API_KEY;
     Anchor authAnchor;
     TabPanel tabPanel = new TabPanel() {{
         setAnimationEnabled(true);
     }};
     private Group[] groups;
-    private LoginAsync lm;
+
+    private LoginAsync lm = GWT.create(Login.class);
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -59,7 +61,6 @@ public class OmgRentBbq implements EntryPoint {
         panel.add(new Image(MainBundle.INSTANCE.logo()), DockPanel.WEST);
         RootPanel rootPanel = RootPanel.get("main");
         rootPanel.add(panel);
-        lm = GWT.create(Login.class);
 
         lm.getUserSession(Window.Location.getHref(), new AsyncCallback<Pair<UserSession, String>>() {
             @Override
@@ -142,8 +143,14 @@ public class OmgRentBbq implements EntryPoint {
         });
     }
 
+    private ListBox payeeBox = new ListBox() {{
+        setVisibleItemCount(4);
+    }};
+
     private class MyRunAsyncCallback implements RunAsyncCallback {
+
         private Timer timer;
+        private VerticalPanel verticalPanel;
 
         @Override
         public void onFailure(Throwable throwable) {
@@ -152,23 +159,19 @@ public class OmgRentBbq implements EntryPoint {
 
         @Override
         public void onSuccess() {
+
             final FlexTable flexTable = new FlexTable();
 
-            final ListBox groupList = new ListBox();
             for (Group group : groups) {
 
                 groupList.addItem(group.getName(), String.valueOf(group.$$()));
             }
             flexTable.setWidget(0, 0, new HTML("<h2>Manage your groups of payees and payments"));
             flexTable.setWidget(1, 0, new Label("Groups"));
-            flexTable.setWidget(1, 2, new Anchor("(+)") {
-
-                {
-                    setTitle("add a new Group");
-                }
-
-            });
-            flexTable.setWidget(1, 3, new Anchor("(-)") {
+            flexTable.setWidget(1, 1, new Anchor("(+)") {{
+                setTitle("add a new Group");
+            }});
+            flexTable.setWidget(1, 2, new Anchor("(-)") {
                 {
                     groupList.addChangeHandler(new ChangeHandler() {
                         @Override
@@ -180,7 +183,7 @@ public class OmgRentBbq implements EntryPoint {
                 }
 
                 private void title() {
-                    if (groups.length>0&&!groups[groupList.getSelectedIndex()].isImmutable()) {
+                    if (groups.length > 0 && !groups[groupList.getSelectedIndex()].isImmutable()) {
                         setVisible(false);
                     } else {
                         setVisible(true);
@@ -192,17 +195,10 @@ public class OmgRentBbq implements EntryPoint {
             flexTable.setWidget(1, 4, groupList);
             flexTable.getFlexCellFormatter().setColSpan(0, 0, 5);
             flexTable.getFlexCellFormatter().setColSpan(1, 4, 2);
-            final ListBox payeeBox = new ListBox() {{
-                setVisibleItemCount(4);
-            }};
-
-
-            populatePayeeList(groups[groupList.getSelectedIndex()], payeeBox);
-
-
-            tabPanel.add(new VerticalPanel() {{
+            populatePayeeList(groups[groupList.getSelectedIndex()]);
+            verticalPanel = new VerticalPanel() {{
                 add(flexTable);
-                final HorizontalPanel panel1 = new HorizontalPanel() {{
+                add(new HorizontalPanel() {{
                     add(new Label("Payees"));
                     add(new Anchor("(+)") {{
                         GWT.runAsync(new RunAsyncCallback() {
@@ -219,10 +215,10 @@ public class OmgRentBbq implements EntryPoint {
                         });
                     }});
                     add(payeeBox);
-                }};
-                add(panel1);
+                }});
 
-            }}, "Manage Groups");
+            }};
+            tabPanel.insert(verticalPanel, "Manage Groups", 1);
 
         }
 
@@ -242,7 +238,7 @@ public class OmgRentBbq implements EntryPoint {
 
         }
 
-        private void populatePayeeList(Group group, final ListBox payeeBox) {
+        private void populatePayeeList(Group group) {
             lm.getPayeesForGroup(group.$$(), new AsyncCallback<List<Payee>>() {
                 @Override
                 public void onFailure(Throwable throwable) {
@@ -250,6 +246,7 @@ public class OmgRentBbq implements EntryPoint {
 
                 @Override
                 public void onSuccess(List<Payee> payees) {
+                    payeeBox.clear();
                     for (Payee payee : payees) {
                         payeeBox.addItem(payee.getNickname());
                     }
@@ -271,28 +268,47 @@ public class OmgRentBbq implements EntryPoint {
             public void onClick(ClickEvent clickEvent) {
 
                 final DecoratedPopupPanel decoratedPopupPanel = new DecoratedPopupPanel();
-                final PayeePanel payeePanel = new PayeePanel(decoratedPopupPanel, new AsyncCallback<Payee>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        report(throwable);
-                    }
+                final PayeePanel payeePanel = new PayeePanel(decoratedPopupPanel,
+                        new AsyncCallback<Payee>() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
 
-                    @Override
-                    public void onSuccess(Payee payee) {
-                        lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
+                            }
+
+                            @Override
+                            public void onSuccess(Payee payee) {
+                                Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
+                                decoratedPopupPanel.hide(true);
+                            }
+                        },
+                        new AsyncCallback<Payee>() {
                             @Override
                             public void onFailure(Throwable throwable) {
                                 report(throwable);
                             }
 
                             @Override
-                            public void onSuccess(Payee payee) {
-                                decoratedPopupPanel.hide(true);
-                                Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
+                            public void onSuccess(final Payee payee) {
+                                new Timer() {
+                                    @Override
+                                    public void run() {
+                                        lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
+                                            @Override
+                                            public void onFailure(Throwable throwable) {
+                                                report(throwable);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(final Payee payee) {
+                                                populatePayeeList(group);
+                                            }
+                                        });
+                                    }
+                                }.schedule(1000);
+
+
                             }
                         });
-                    }
-                });
 
             }
 

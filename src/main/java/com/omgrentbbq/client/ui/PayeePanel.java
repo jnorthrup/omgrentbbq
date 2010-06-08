@@ -91,7 +91,7 @@ public class PayeePanel extends VerticalPanel {
                     };
                 else timer.cancel();
 
-                timer.schedule(2500);
+                timer.schedule(500);
 
             }
         };
@@ -102,14 +102,14 @@ public class PayeePanel extends VerticalPanel {
 
     private void updatepaycycleWidget(Periodicity periodicity, SimplePanel simplePanel) {
         scheduleWidget = periodicity.createScheduleWidget();
-        simplePanel.setWidget(scheduleWidget);
-
+        simplePanel.setWidget(scheduleWidget); 
     }
 
     /**
      * modal dialog ctor
      *
      * @param panel
+     * @param callback
      */
     public PayeePanel(final PopupPanel panel, final AsyncCallback<Payee>... callback) {
         this();
