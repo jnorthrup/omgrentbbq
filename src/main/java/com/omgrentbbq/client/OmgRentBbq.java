@@ -186,6 +186,7 @@ public class OmgRentBbq implements EntryPoint {
                         @Override
                         public void onClick(ClickEvent clickEvent) {
                             final DialogBox box = new DialogBox();
+                            box.setAnimationEnabled(true);
                             box.setText("<h2>add a new Group payment");
 
                             final GroupPanel groupPanel = new GroupPanel();
@@ -226,35 +227,7 @@ public class OmgRentBbq implements EntryPoint {
 
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            {
-
-                                                new Timer() {
-                                                    @Override
-                                                    public void run() {
-                                                        lm.getGroups(user, new AsyncCallback<Group[]>() {
-                                                            @Override
-                                                            public void onFailure(Throwable throwable) {
-                                                            }
-
-                                                            @Override
-                                                            public void onSuccess(Group[] groups) {
-                                                                OmgRentBbq.this.groups = groups;
-                                                                groupList.clear();
-                                                                for (Group group1 : groups) {
-                                                                    groupList.addItem(group1.getName());
-
-                                                                }
-                                                                if (groupList.getItemCount() > 0) {
-                                                                    groupList.setSelectedIndex(0);
-                                                                    populatePayeeList(groups[0]);
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                }.schedule(1000);
-                                                box.hide(true);
-
-                                            }
+                                            groupReload(box);
                                         }
                                     });
 
@@ -275,7 +248,49 @@ public class OmgRentBbq implements EntryPoint {
                         }
                     });
                     title();
+                    addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent clickEvent) {
+                            final Group group = groups[groupList.getSelectedIndex()];
+                            if (groups.length > 0 && !group.isImmutable()) {
+                                final PopupPanel panel1 = new PopupPanel(true);
+                                panel1.setAnimationEnabled(true);
+                                panel1.center();
+                                panel1.setWidget(new VerticalPanel() {{
+                                    add(new Label("are you sure you wish to delete " + group.getName()));
+                                    add(new HorizontalPanel() {{
+                                        add(new Button("Yes, Delete the group called " + group.getName()) {{
+                                            addClickHandler(new ClickHandler() {
+                                                @Override
+                                                public void onClick(ClickEvent clickEvent) {
+                                                    lm.deleteGroup(user, group, new AsyncCallback<Void>() {
+                                                        @Override
+                                                        public void onFailure(Throwable throwable) {
+                                                            panel1.hide();
+                                                            Window.setStatus("Group " + group + " deletion has failed: " + throwable.getMessage());
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            groupReload(panel1);
+                                                        }
+                                                    });
+
+                                                }
+                                            });
+                                        }});
+                                        add(new Button("Cancel"));
+                                    }});
+                                }});
+                                panel1.setModal(true);
+                                panel1.show();
+                            }
+
+                        }
+                    });
                 }
+
+                ;
 
                 private void title() {
                     if (groups.length > 0 && groups[groupList.getSelectedIndex()].isImmutable()) {
@@ -285,6 +300,7 @@ public class OmgRentBbq implements EntryPoint {
                         setTitle("remove " + groupList.getItemText(groupList.getSelectedIndex()));
                     }
                 }
+
             }
 
             );
@@ -328,7 +344,8 @@ public class OmgRentBbq implements EntryPoint {
                                             CurrentSelectedGroup currentSelectedGroup = new CurrentSelectedGroup().invoke();
                                             final Group group = currentSelectedGroup.getGroup();
 
-                                            final DialogBox box = new DialogBox();
+                                            final DecoratedPopupPanel box = new DecoratedPopupPanel();
+                                            box.setAnimationEnabled(true);
                                             final PayeePanel payeePanel = new PayeePanel(box,
                                                     new AsyncCallback<Payee>() {
                                                         @Override
@@ -388,6 +405,38 @@ public class OmgRentBbq implements EntryPoint {
             };
             tabPanel.insert(verticalPanel, "Manage Groups", 1);
 
+        }
+
+        private void groupReload(PopupPanel box) {
+            if (true) {
+
+                new Timer() {
+                    @Override
+                    public void run() {
+                        lm.getGroups(user, new AsyncCallback<Group[]>() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                            }
+
+                            @Override
+                            public void onSuccess(Group[] groups) {
+                                OmgRentBbq.this.groups = groups;
+                                groupList.clear();
+                                for (Group group1 : groups) {
+                                    groupList.addItem(group1.getName());
+
+                                }
+                                if (groupList.getItemCount() > 0) {
+                                    groupList.setSelectedIndex(0);
+                                    populatePayeeList(groups[0]);
+                                }
+                            }
+                        });
+                    }
+                }.schedule(1000);
+                box.hide(true);
+
+            }
         }
 
 
