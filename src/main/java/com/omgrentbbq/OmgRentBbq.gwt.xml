@@ -15,7 +15,7 @@
     <!-- Other module inherits                                      -->
 
     <!-- Specify the app entry point class.                         -->
-    <entry-point class='com.omgrentbbq.client.OmgRentBbq'/>
+    <entry-point class='com.omgrentbbq.client.App'/>
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>

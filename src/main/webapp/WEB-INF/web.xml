@@ -18,8 +18,8 @@
         <web-resource-collection>
             <web-resource-name>rpc</web-resource-name>
 
-            <url-pattern>com.omgrentbbq.OmgRentBbq/u</url-pattern>
-            <url-pattern>com.omgrentbbq.OmgRentBbq/tm</url-pattern>
+            <url-pattern>com.omgrentbbq.App/u</url-pattern>
+            <url-pattern>com.omgrentbbq.App/tm</url-pattern>
         </web-resource-collection>
         <user-data-constraint>
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
