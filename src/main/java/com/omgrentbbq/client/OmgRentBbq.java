@@ -4,13 +4,17 @@ package com.omgrentbbq.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
 import com.omgrentbbq.client.ui.ContactCreationForm;
+import com.omgrentbbq.client.ui.PayeePanel;
 import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.shared.model.*;
 
@@ -176,7 +180,7 @@ public class OmgRentBbq implements EntryPoint {
                 }
 
                 private void title() {
-                    if (!groups[groupList.getSelectedIndex()].isImmutable()) {
+                    if (groups.length>0&&!groups[groupList.getSelectedIndex()].isImmutable()) {
                         setVisible(false);
                     } else {
                         setVisible(true);
@@ -201,17 +205,18 @@ public class OmgRentBbq implements EntryPoint {
                 final HorizontalPanel panel1 = new HorizontalPanel() {{
                     add(new Label("Payees"));
                     add(new Anchor("(+)") {{
-                     GWT.runAsync(new RunAsyncCallback() {
-                         @Override
-                         public void onFailure(Throwable throwable) {
-                         }
+                        GWT.runAsync(new RunAsyncCallback() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                            }
 
-                         @Override
-                         public void onSuccess() {
-                             setTitle("add a new Payee to " + groups[groupList.getSelectedIndex()].getName());
-                             addClickHandler(new addPayeeClickHandler(groupList));
-                         }
-                     });
+                            @Override
+                            public void onSuccess() {
+                                final Group group = groups[groupList.getSelectedIndex()];
+                                setTitle("add a new Payee to " + group.getName());
+                                addClickHandler(new addPayeeClickHandler(group));
+                            }
+                        });
                     }});
                     add(payeeBox);
                 }};
@@ -253,107 +258,50 @@ public class OmgRentBbq implements EntryPoint {
         }
 
         private class addPayeeClickHandler implements ClickHandler {
-            final PopupPanel popup;
-            private final ListBox groupList;
+            private final Group group;
 
-            public addPayeeClickHandler(ListBox groupList) {
-                this.groupList = groupList;
-                popup = new PopupPanel();
+            public addPayeeClickHandler(Group group) {
+
+
+                this.group = group;
             }
+
 
             @Override
             public void onClick(ClickEvent clickEvent) {
-                final ContactCreationForm contactForm = new ContactCreationForm();
 
-                final TextBox account = new TextBox();
-                final Label nickname = new Label();
+                final DecoratedPopupPanel decoratedPopupPanel = new DecoratedPopupPanel();
+                final PayeePanel payeePanel = new PayeePanel(decoratedPopupPanel, new AsyncCallback<Payee>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        report(throwable);
+                    }
 
+                    @Override
+                    public void onSuccess(Payee payee) {
+                        lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                                report(throwable);
+                            }
 
-                final CaptionPanel caption = new CaptionPanel();
-                popup.add(
-                        new VerticalPanel() {{
-                            final Group group = groups[groupList.getSelectedIndex()];
-                            add(new HTML("<h2>Add new payee to " + group.getName()));
-                            add(new HorizontalPanel() {{
-                                add(new Label("nickname: "));
-                                add(nickname);
+                            @Override
+                            public void onSuccess(Payee payee) {
+                                decoratedPopupPanel.hide(true);
+                                Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
+                            }
+                        });
+                    }
+                });
 
-//                                                    nickname.setEnabled(false);
+            }
 
-
-                            }});
-                            add(new HorizontalPanel() {{
-                                add(new Label("account"));
-                                add(account);
-                            }});
-
-                            final KeyPressHandler pressHandler = new KeyPressHandler() {
-                                @Override
-                                public void onKeyPress(KeyPressEvent keyPressEvent) {
-                                    mutate(nickname, contactForm, account);
-                                }
-                            };
-                            account.addKeyPressHandler(pressHandler);
-                            contactForm.name.addKeyPressHandler(pressHandler);
-
-
-                            final ChangeHandler changeHandler = new ChangeHandler() {
-                                @Override
-                                public void onChange(ChangeEvent changeEvent) {
-                                    mutate(nickname, contactForm, account);
-                                }
-                            };
-                            account.addChangeHandler(changeHandler);
-                            contactForm.name.addChangeHandler(changeHandler);
-                            add(contactForm);
-                            add(new HorizontalPanel() {{
-                                add(new Button("ok") {{
-                                    addClickHandler(new ClickHandler() {
-                                        @Override
-                                        public void onClick(ClickEvent clickEvent) {
-                                            final Contact contact = new Contact();
-                                            final String s = contactForm.validate(contact);
-                                            if (s.isEmpty()) {
-                                                lm.createPayee(group, contact, new AsyncCallback<Payee>() {
-                                                    @Override
-                                                    public void onFailure(Throwable throwable) {
-                                                        popup.hide(true);
-                                                        Window.setStatus("payee was not added to group: " + throwable.getMessage());
-                                                    }
-
-                                                    @Override
-                                                    public void onSuccess(Payee payee) {
-                                                        popup.hide();
-                                                        Window.setStatus(payee.getName() + " was successfully added to " + group.getName());
-                                                    }
-                                                });
-                                            } else
-                                                caption.setCaptionHTML(s);
-                                        }
-                                    });
-                                }});
-                                add(new Button("cancel") {{
-                                    addClickHandler(new ClickHandler() {
-                                        @Override
-                                        public void onClick(ClickEvent clickEvent) {
-                                            popup.setModal(false);
-                                            popup.hide(true);
-                                            Window.setStatus("cancelled add payee operation");
-
-                                        }
-                                    });
-                                }});
-
-                            }});
-
-                            add(caption);
-                        }});
-                popup.setPopupPosition(20, 20);
-                popup.setAnimationEnabled(true);
-                popup.setModal(true);
-                popup.show();
+            void report(Throwable t) {
+                Window.setStatus("payee was not added to " + group.getName() + ": " + t.getMessage());
             }
         }
+
+
     }
 }
 

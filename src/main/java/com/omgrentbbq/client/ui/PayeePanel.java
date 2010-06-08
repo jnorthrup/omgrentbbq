@@ -1,14 +1,13 @@
 package com.omgrentbbq.client.ui;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.shared.model.Contact;
-import com.omgrentbbq.shared.model.Periodicity;
 import com.omgrentbbq.shared.model.Payee;
+import com.omgrentbbq.shared.model.Periodicity;
+
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -21,16 +20,17 @@ public class PayeePanel extends VerticalPanel {
     private ContactCreationForm contactCreationForm;
     private ListBox payCycleListbox;
     private FlexTable scheduleWidget;
-    private TextBox nickname;
+    private Label nickname;
     private TextBox account;
     private TextBox fax;
+    private Timer timer;
 
-    PayeePanel() {
+    public PayeePanel() {
 
         add(new HTML("<h2>Adding a new Payee</h2>"));
         add(new HorizontalPanel() {{
-            add(new Label("Nickname"));
-            nickname = new TextBox();
+            add(new Label("Nickname: "));
+            nickname = new Label();
             add(nickname);
         }});
 
@@ -76,11 +76,34 @@ public class PayeePanel extends VerticalPanel {
             }
 
         });
+
+
+        final KeyPressHandler pressHandler = new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent keyPressEvent) {
+                if (null == timer)
+                    timer = new Timer() {
+                        @Override
+                        public void run() {
+                            nickname.setText(contactCreationForm.name.getText() + "/" + account.getText());
+ 
+                        }
+                    };
+                else timer.cancel();
+
+                timer.schedule(2500);
+
+            }
+        };
+        contactCreationForm.name.addKeyPressHandler(
+                pressHandler);
+        account.addKeyPressHandler(pressHandler);
     }
 
     private void updatepaycycleWidget(Periodicity periodicity, SimplePanel simplePanel) {
         scheduleWidget = periodicity.createScheduleWidget();
         simplePanel.setWidget(scheduleWidget);
+
     }
 
     /**
@@ -99,15 +122,36 @@ public class PayeePanel extends VerticalPanel {
                     public void onClick(ClickEvent clickEvent) {
 
                         captionPanel.setCaptionHTML("");
-                        final Contact contact = new Contact();
+                        final Payee payee = new Payee();
+                        final Contact contact = payee.getContact();
+
                         final String s = contactCreationForm.validate(contact);
                         if (!s.isEmpty()) {
                             final String html = captionPanel.getCaptionHTML();
                             captionPanel.setCaptionHTML(html + "<br/>" + s);
                             return;
                         } else {
-                            contact.$("address2",contactCreationForm.address2.getText());
+                            contact.$("address2", contactCreationForm.address2.getText());
 
+                        }
+                        String acctVal = null;
+                        acctVal = account.getText();
+                        final String nicknameVal = nickname.getText();
+                        if (nicknameVal.isEmpty()) {
+                            payee.$("nickname", contact.getName() + ((acctVal.isEmpty()) ? "" : "-" + acctVal));
+                            nickname.setText((String) payee.$("nickname"));
+                        } else payee.$("nickname", nicknameVal);
+                        payee.$("account", acctVal);
+                        final Periodicity periodicity = Periodicity.values()[payCycleListbox.getSelectedIndex()];
+                        payee.$("periodicity", periodicity);
+                        payee.$("fax", fax.getText());
+                        payee.$("schedule", periodicity.getSchedule(scheduleWidget, captionPanel));
+                        if (payee.$("schedule") != null) {
+                            for (AsyncCallback<Payee> payeeAsyncCallback : callback) {
+                                payeeAsyncCallback.onSuccess(payee);
+                            }
+
+                            panel.hide(true);
                         }
 
                     }

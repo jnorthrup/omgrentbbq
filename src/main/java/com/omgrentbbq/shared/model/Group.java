@@ -15,6 +15,6 @@ public class Group extends Memento{
     }
 
     public boolean isImmutable() {
-        return Boolean.valueOf( String.valueOf( $("immutable")));
+        return Boolean.TRUE.toString().equals( String.valueOf( $("immutable")));
     }
 }

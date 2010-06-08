@@ -25,5 +25,6 @@ public interface Login extends RemoteService {
 
     List<Payee> getPayeesForGroup(Serializable serializable);
 
-    Payee createPayee(Group  serializable, Contact contact);
+    Payee addPayeeForGroup(Payee payee, Group group);
+
 }

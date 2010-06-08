@@ -36,7 +36,6 @@ public enum Periodicity {
         public Widget createWidget(final int... features) {
             Widget widget = null;
             if (features.length > 0)
-
                 switch (features[0]) {
                     case 1:
                         widget = Weekly.createWidget();

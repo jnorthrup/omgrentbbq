@@ -5,9 +5,14 @@ import com.omgrentbbq.shared.model.KeyProperty;
 import com.omgrentbbq.shared.model.Memento;
 import com.omgrentbbq.shared.model.Pair;
 import org.apache.commons.beanutils.BeanMap;
+import org.apache.commons.beanutils.PropertyUtils;
 
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -138,14 +143,20 @@ public class MementoFactory {
             entity = new Entity($k(t));
         else
             entity = new Entity(t.getClass().getName());
-        for (String s : t.$.keySet()) {
-            Serializable serializable = t.$(s);
-            if (serializable instanceof Memento) {
+        for (String nkey : t.$.keySet()) {
+            Serializable serializable = t.$(nkey);
+            if (serializable instanceof Object[]) {
+                entity.setProperty(nkey, Arrays.asList(serializable));
+            } else if (serializable instanceof Enum) {
+                Enum anEnum = (Enum) serializable;
+                entity.setProperty(nkey, anEnum.name());
+
+            } else if (serializable instanceof Memento) {
                 Memento memento = (Memento) serializable;
-                entity.setProperty(s, $k(memento));
+                entity.setProperty(nkey, $k(memento));
 
             } else {
-                entity.setProperty(s, serializable);
+                entity.setProperty(nkey, serializable);
             }
 
         }
@@ -162,10 +173,15 @@ public class MementoFactory {
      */
     public static <T extends Memento> T $(Entity entity, Class<T>... optionalClass) {
         T t = null;
+        Map<String, PropertyDescriptor> descriptors = new LinkedHashMap<String, PropertyDescriptor>();
         try {
             Class<T> aClass = null;
             if (optionalClass.length > 0) {
                 aClass = optionalClass[0];
+                PropertyDescriptor[] de = PropertyUtils.getPropertyDescriptors(aClass);
+                for (PropertyDescriptor descriptor : de) {
+                    descriptors.put(descriptor.getName(), descriptor);
+                }
             } else {
                 try {
                     aClass = (Class<T>) Class.forName(Memento.class.getPackage().getName() + '.' + entity.getKey().getKind());
@@ -174,20 +190,22 @@ public class MementoFactory {
                 }
             }
             t = aClass.getConstructor().newInstance();
+
+
             KeyProperty keyProperty = aClass.getAnnotation(KeyProperty.class);
 
             Map<String, Object> map = entity.getProperties();
             for (String k : map.keySet()) {
-                Object o = map.get(k);
-                if (!(o instanceof Class)) {
+                Object val = map.get(k);
+                if (!(val instanceof Class)) {
                     if (k.equals(keyProperty)) {
-                        t.$$((Serializable) o);
+                        t.$$((Serializable) val);
                     } else {
-                        if (o instanceof Memento) {
-                            Memento memento = (Memento) o;
+                        if (val instanceof Memento) {
+                            Memento memento = (Memento) val;
                             t.$(k, $k(memento));
-                        } else if (o instanceof Key) {
-                            Key key = (Key) o;
+                        } else if (val instanceof Key) {
+                            Key key = (Key) val;
 
                             try {
                                 Entity e = DatastoreServiceFactory.getDatastoreService().get(key);
@@ -195,8 +213,14 @@ public class MementoFactory {
                             } catch (Exception e) {
                                 t.$(k, key);
                             }
+                        } else if (val instanceof List && descriptors.containsKey(k) && descriptors.get(k).getPropertyType().isArray()) {
+                            List list = (List) val;
+                            final PropertyDescriptor propertyDescriptor = descriptors.get(k);
+                            final Class<?> c = propertyDescriptor.getPropertyType();
+                            final Class<? extends Serializable> type = (Class<? extends Serializable>) c.getComponentType();
+                            t.$(k, listToArray(list, type));
                         } else {
-                            t.$(k, (Serializable) o);
+                            t.$(k, (Serializable) val);
                         }
                     }
 
@@ -206,12 +230,38 @@ public class MementoFactory {
                 t.$.remove(keyProperty.value());
             }
         } catch (Exception ignored) {
+            final Throwable throwable = ignored.fillInStackTrace();
         }
         Key key = entity.getKey();
         if (null == t.$$()) {
             t.$$(key.getName() == null ? key.getId() : key.getName());
         }
         return t;
+    }
+
+     public static <T extends Memento, X extends Serializable> Object[] listToArray(List list, Class<X> type) {
+        X[] theArray = (X[]) Array.newInstance(type, list.size());
+
+        if (!Number.class.isAssignableFrom(type)) {
+            for (int i = 0; i < list.toArray().length; i++) {
+                theArray[i] = (X) list.get(i);
+            }
+        } else {
+            for (int i = 0; i < list.toArray().length; i++) {
+
+                final Number n = (Number) list.get(i);
+                Array.set(theArray, i,
+                        Long.class == type ? n.longValue()
+                                : Integer.class == type ? n.intValue()
+                                : Short.class == type ? n.shortValue()
+                                : Byte.class == type ? n.byteValue()
+                                : Double.class == type ? n.doubleValue()
+                                : Float.class == type ? n.floatValue()
+                                : n);
+            }
+
+        }
+        return theArray;
     }
 
     public static void embed(Pair<String, ? extends Memento> src, Memento into) {

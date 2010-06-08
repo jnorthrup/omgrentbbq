@@ -16,19 +16,13 @@ import java.util.List;
  */
 public interface LoginAsync {
 
- 
-    void getUserSession(String browserUrl, AsyncCallback<Pair<UserSession, String>> async);
-
-    void getGroups(User user, AsyncCallback<Group[]> async);
-
-
- 
-    void createNewMember(User user, Contact profile, Group[] groups, AsyncCallback<Void> async);
-
+    void addPayeeForGroup(Payee payee, Group group, AsyncCallback<Payee> async);
 
     void getPayeesForGroup(Serializable serializable, AsyncCallback<List<Payee>> async);
 
+    void createNewMember(User user, Contact profile, Group[] groups, AsyncCallback<Void> async);
 
+    void getGroups(User user, AsyncCallback<Group[]> async);
 
-    void createPayee(Group serializable, Contact contact, AsyncCallback<Payee> async);
+    void getUserSession(String browserUrl, AsyncCallback<Pair<UserSession, String>> async);
 }

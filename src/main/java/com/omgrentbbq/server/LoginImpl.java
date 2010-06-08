@@ -146,9 +146,8 @@ public class LoginImpl extends HybridServiceServlet implements Login {
     }
 
     @Override
-    public Payee createPayee(Group  group, Contact contact) {
-        final Payee payee = new Payee();
-        embed(new Pair<String, Memento>("contact", contact), payee);
+    public Payee addPayeeForGroup(Payee payee, Group group) {
+
         payee.$("group", group);
         update(payee); 
         return payee ;

@@ -8,23 +8,33 @@ import java.io.Serializable;
  * Date: Jun 4, 2010
  * Time: 5:20:08 PM
  */
-public class Payee extends Memento{
+public class Payee extends Memento {
 
-    Serializable getGroup(){
+    Serializable getGroup() {
 
         return $("group");
     }
-    Contact getContact(){
+
+    public Contact getContact() {
         final Contact contact = new Contact();
-        contact.$$(new Pair<String, Memento>("contact",this  ));
+        contact.$$(new Pair<String, Memento>("contact", this));
         return contact;
     }
 
     public String getName() {
-            return getContact().getName();
+        return getContact().getName();
     }
 
     public String getNickname() {
         return $("nickname");
+    }
+
+    public Periodicity getPeriodicity() {
+        return Periodicity.valueOf(String.valueOf($("periodicity")));
+    }
+
+
+    public Integer[] getSchedule() {
+        return $("schedule");
     }
 }
