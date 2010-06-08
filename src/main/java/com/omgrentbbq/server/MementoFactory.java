@@ -149,7 +149,7 @@ public class MementoFactory {
             entity = new Entity(t.getClass().getName());
         for (String nkey : t.$.keySet()) {
             Serializable serializable = t.$(nkey);
-            if (serializable.getClass().isArray()) {
+            if (serializable!=null&&serializable.getClass().isArray()) {
                 final Class<? extends Serializable> type = (Class<? extends Serializable>) serializable.getClass().getComponentType();
 
                 entity.setProperty(nkey, listifyArray(serializable, type));

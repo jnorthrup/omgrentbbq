@@ -1,0 +1,18 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field="res" type="com.omgrentbbq.client.resources.MainBundle"/>
+    <g:HTMLPanel>
+        <h2>create a new shared Payment Group</h2>
+
+        <p/>
+        name:
+        <g:TextBox ui:field="name"/>
+        <br/>
+        private:
+        <g:CheckBox ui:field="privacy"/>
+        <br/>
+        <g:Button text="ok" ui:field="okButton"/>
+        <g:Button text="cancel" ui:field="cancelButton"/>
+
+    </g:HTMLPanel>
+</ui:UiBinder>

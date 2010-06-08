@@ -5,7 +5,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.omgrentbbq.shared.model.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,10 +20,13 @@ public interface Login extends RemoteService {
     public Group[] getGroups(User user);
 
 
-    void createNewMember(User user,Contact profile, Group[] groups);
+    void createNewMember(User user, Contact profile, Group[] groups);
 
     List<Payee> getPayeesForGroup(Serializable serializable);
 
     Payee addPayeeForGroup(Payee payee, Group group);
 
+    void addGroup(User user, Group group);
+
+    void deleteGroup(User user, Group group);
 }

@@ -23,6 +23,6 @@
     <set-property name="ClientBundle.enableInlining" value="true"/>
     <!-- Specify the app servlets.   -->
     <!--<define-property name="user.agent" values="ie6,ie8,gecko,gecko1_8,safari,opera"/>-->
-    <set-property name="user.agent" value="safari,gecko1_8"/>
+    <!--<set-property name="user.agent" value="safari,gecko1_8"/>-->
  
 </module>

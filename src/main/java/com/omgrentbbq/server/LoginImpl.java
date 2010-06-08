@@ -47,7 +47,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
                     url = service.createLoginURL(browserUrl);
                 } else {
                     url = service.createLogoutURL(browserUrl);
-                } 
+                }
             } catch (EntityNotFoundException ignored) {
 
                 user = MementoFactory.writeMemento(sysuser, User.class);
@@ -110,6 +110,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         if (groups.length == 0) {
             final Group group = new Group();
             group.$("name", profile.$("name") + "'s free private membership");
+            group.$("private", true);
             group.$("immutable", true);
 
             groups = new Group[]{group};
@@ -150,5 +151,28 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         payee.$("group", group);
         update(payee);
         return payee;
+    }
+
+    @Override
+    public void addGroup(User user, Group group) {
+        update(group);
+        final Membership membership = new Membership(user, group);
+        update(membership);
+    }
+
+    @Override
+    public void deleteGroup(User user, Group group) {
+
+        final Query queryMembersForGroup = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $k(group));
+        final int count = DS.prepare(queryMembersForGroup).countEntities();
+        final Iterable<Entity> entityIterable = DS.prepare(queryMembersForGroup.addFilter("user", Query.FilterOperator.EQUAL, $k(user))).asIterable();
+        for (Entity entity : entityIterable) {
+            DS.delete(entity.getKey());
+        }
+
+        if (count < 2) {
+            DS.delete($k(group));
+        }
+
     }
 }

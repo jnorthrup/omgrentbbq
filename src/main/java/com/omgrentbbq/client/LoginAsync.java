@@ -25,4 +25,8 @@ public interface LoginAsync {
     void getGroups(User user, AsyncCallback<Group[]> async);
 
     void getUserSession(String browserUrl, AsyncCallback<Pair<UserSession, String>> async);
+
+    void addGroup(User user, Group group, AsyncCallback<Void> async);
+
+    void deleteGroup(User user, Group group, AsyncCallback<Void> async);
 }

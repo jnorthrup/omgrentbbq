@@ -13,7 +13,7 @@ import com.omgrentbbq.shared.model.Group;
  * Date: May 30, 2010
  * Time: 4:21:55 PM
  */
-class PayGroupPanel extends VerticalPanel {
+public class PayGroupPanel extends VerticalPanel {
     private ContactCreationForm contactCreationForm;
     private TextBox nickname;
 

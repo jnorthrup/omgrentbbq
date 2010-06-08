@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
 import com.omgrentbbq.client.ui.ContactCreationForm;
+import com.omgrentbbq.client.ui.GroupPanel;
 import com.omgrentbbq.client.ui.PayeePanel;
 import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.shared.model.*;
@@ -38,7 +39,16 @@ public class OmgRentBbq implements EntryPoint {
     private VerticalPanel authPanel;
 
 
-    final ListBox groupList = new ListBox();
+    final ListBox groupList = new ListBox() {{
+        addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent changeEvent) {
+                if (getSelectedIndex() >= 0) {
+                    populatePayeeList(groups[getSelectedIndex()]);
+                }
+            }
+        });
+    }};
     static String GDATA_API_KEY;
     Anchor authAnchor;
     TabPanel tabPanel = new TabPanel() {{
@@ -47,6 +57,7 @@ public class OmgRentBbq implements EntryPoint {
     private Group[] groups;
 
     private LoginAsync lm = GWT.create(Login.class);
+    private User user;
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -76,7 +87,7 @@ public class OmgRentBbq implements EntryPoint {
                 panel.add(authAnchor, DockPanel.EAST);
                 String url = userSessionURLPair.getSecond();
                 authAnchor.setHref(url);
-                final User user = (User) userSession.$("user");
+                user = (User) userSession.$("user");
                 panel.add(tabPanel, DockPanel.CENTER);
                 tabPanel.add(new WelcomeTab(), "Welcome!");
                 tabPanel.selectTab(0);
@@ -168,10 +179,94 @@ public class OmgRentBbq implements EntryPoint {
             }
             flexTable.setWidget(0, 0, new HTML("<h2>Manage your groups of payees and payments"));
             flexTable.setWidget(1, 0, new Label("Groups"));
-            flexTable.setWidget(1, 1, new Anchor("(+)") {{
-                setTitle("add a new Group");
-            }});
-            flexTable.setWidget(1, 2, new Anchor("(-)") {
+            flexTable.setWidget(1, 1, new Anchor("(+)") {
+                {
+                    setTitle("add a new Group");
+                    addClickHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent clickEvent) {
+                            final DialogBox box = new DialogBox();
+                            box.setText("<h2>add a new Group payment");
+
+                            final GroupPanel groupPanel = new GroupPanel();
+                            box.setWidget(groupPanel);
+                            box.setPopupPosition(20, 20);
+                            box.show();
+                            groupPanel.cancelButton.addClickHandler(new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent clickEvent) {
+                                    box.hide(true);
+                                }
+                            });
+                            groupPanel.okButton.addClickHandler(new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent clickEvent) {
+                                    final String s = groupPanel.name.getText();
+                                    if (s.isEmpty()) {
+                                        box.setText("each group must have a name, please enter a name in the box");
+                                        return;
+                                    } else {
+                                        for (Group group1 : groups) {
+                                            if (group1.getName().equals(s)) {
+                                                box.setText("this name is already in use, please choose a different name");
+                                                return;
+                                            }
+                                        }
+                                    }
+
+
+                                    final Group group = new Group();
+                                    group.$("name", groupPanel.name.getText());
+                                    group.$("privacy", groupPanel.privacy.getValue());
+
+                                    lm.addGroup(OmgRentBbq.this.user, group, new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onFailure(Throwable throwable) {
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            {
+
+                                                new Timer() {
+                                                    @Override
+                                                    public void run() {
+                                                        lm.getGroups(user, new AsyncCallback<Group[]>() {
+                                                            @Override
+                                                            public void onFailure(Throwable throwable) {
+                                                            }
+
+                                                            @Override
+                                                            public void onSuccess(Group[] groups) {
+                                                                OmgRentBbq.this.groups = groups;
+                                                                groupList.clear();
+                                                                for (Group group1 : groups) {
+                                                                    groupList.addItem(group1.getName());
+
+                                                                }
+                                                                if (groupList.getItemCount() > 0) {
+                                                                    groupList.setSelectedIndex(0);
+                                                                    populatePayeeList(groups[0]);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }.schedule(1000);
+                                                box.hide(true);
+
+                                            }
+                                        }
+                                    });
+
+                                }
+                            });
+                        }
+                    }
+                    );
+
+                }
+            });
+            flexTable.setWidget(1, 2, new Anchor("-") {
                 {
                     groupList.addChangeHandler(new ChangeHandler() {
                         @Override
@@ -183,141 +278,153 @@ public class OmgRentBbq implements EntryPoint {
                 }
 
                 private void title() {
-                    if (groups.length > 0 && !groups[groupList.getSelectedIndex()].isImmutable()) {
+                    if (groups.length > 0 && groups[groupList.getSelectedIndex()].isImmutable()) {
                         setVisible(false);
                     } else {
                         setVisible(true);
                         setTitle("remove " + groupList.getItemText(groupList.getSelectedIndex()));
                     }
                 }
-            });
+            }
+
+            );
 
             flexTable.setWidget(1, 4, groupList);
-            flexTable.getFlexCellFormatter().setColSpan(0, 0, 5);
-            flexTable.getFlexCellFormatter().setColSpan(1, 4, 2);
-            populatePayeeList(groups[groupList.getSelectedIndex()]);
-            verticalPanel = new VerticalPanel() {{
-                add(flexTable);
-                add(new HorizontalPanel() {{
-                    add(new Label("Payees"));
-                    add(new Anchor("(+)") {{
-                        GWT.runAsync(new RunAsyncCallback() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                            }
+            flexTable.getFlexCellFormatter().
 
-                            @Override
-                            public void onSuccess() {
-                                final Group group = groups[groupList.getSelectedIndex()];
-                                setTitle("add a new Payee to " + group.getName());
-                                addClickHandler(new addPayeeClickHandler(group));
-                            }
-                        });
+                    setColSpan(0, 0, 5);
+
+            flexTable.getFlexCellFormatter().
+
+                    setColSpan(1, 4, 2);
+
+            populatePayeeList(groups[groupList.getSelectedIndex()
+
+                    ]);
+            verticalPanel = new VerticalPanel() {
+                {
+                    add(flexTable);
+                    add(new HorizontalPanel() {{
+                        add(new Label("Payees"));
+                        add(new Anchor("(+)") {{
+
+
+                            groupList.addChangeHandler(new ChangeHandler() {
+                                @Override
+                                public void onChange(ChangeEvent changeEvent) {
+
+                                    final int index = groupList.getSelectedIndex();
+
+                                    setTitle("add a new Payee to " + groups[index].getName());
+
+                                }
+                            });
+
+                            addClickHandler(
+                                    new ClickHandler() {
+
+                                        @Override
+                                        public void onClick(ClickEvent clickEvent) {
+                                            CurrentSelectedGroup currentSelectedGroup = new CurrentSelectedGroup().invoke();
+                                            final Group group = currentSelectedGroup.getGroup();
+
+                                            final DialogBox box = new DialogBox();
+                                            final PayeePanel payeePanel = new PayeePanel(box,
+                                                    new AsyncCallback<Payee>() {
+                                                        @Override
+                                                        public void onFailure(Throwable throwable) {
+
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(Payee payee) {
+                                                            Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
+
+                                                            box.hide(true);
+                                                        }
+                                                    },
+                                                    new AsyncCallback<Payee>() {
+                                                        @Override
+                                                        public void onFailure(Throwable throwable) {
+                                                            report(throwable);
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(final Payee payee) {
+                                                            new Timer() {
+                                                                @Override
+                                                                public void run() {
+                                                                    lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
+                                                                        @Override
+                                                                        public void onFailure(Throwable throwable) {
+                                                                            report(throwable);
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onSuccess(final Payee payee) {
+                                                                            populatePayeeList(group);
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }.schedule(1000);
+
+
+                                                        }
+                                                    });
+
+                                        }
+
+                                        void report(Throwable t) {
+                                            final CurrentSelectedGroup group = new CurrentSelectedGroup().invoke();
+                                            Window.setStatus("payee was not added to " + group.getGroup().getName() + ": " + t.getMessage());
+                                        }
+                                    });
+
+                        }});
+                        add(payeeBox);
                     }});
-                    add(payeeBox);
-                }});
 
-            }};
+                }
+            };
             tabPanel.insert(verticalPanel, "Manage Groups", 1);
 
         }
 
-        private void mutate(final Label nickname, final ContactCreationForm contactForm, final TextBox account) {
-            if (timer != null) {
-                timer.cancel();
-            } else {
-                timer = new Timer() {
-                    @Override
-                    public void run() {
-                        nickname.setText(contactForm.name.getText() + "/" + account.getText());
-                    }
-                };
+
+        private class CurrentSelectedGroup {
+            private Group group;
+
+            public Group getGroup() {
+                return group;
             }
 
-            timer.schedule(250);
+            public CurrentSelectedGroup invoke() {
+                final int selectedIndex = groupList.getSelectedIndex();
 
-        }
 
-        private void populatePayeeList(Group group) {
-            lm.getPayeesForGroup(group.$$(), new AsyncCallback<List<Payee>>() {
-                @Override
-                public void onFailure(Throwable throwable) {
+                if (selectedIndex < 0) {
+                    return this;
                 }
-
-                @Override
-                public void onSuccess(List<Payee> payees) {
-                    payeeBox.clear();
-                    for (Payee payee : payees) {
-                        payeeBox.addItem(payee.getNickname());
-                    }
-                }
-            });
-        }
-
-        private class addPayeeClickHandler implements ClickHandler {
-            private final Group group;
-
-            public addPayeeClickHandler(Group group) {
-
-
-                this.group = group;
+                group = groups[selectedIndex];
+                return this;
             }
+        }
+    }
 
+    private void populatePayeeList(Group group) {
+        lm.getPayeesForGroup(group.$$(), new AsyncCallback<List<Payee>>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+            }
 
             @Override
-            public void onClick(ClickEvent clickEvent) {
-
-                final DecoratedPopupPanel decoratedPopupPanel = new DecoratedPopupPanel();
-                final PayeePanel payeePanel = new PayeePanel(decoratedPopupPanel,
-                        new AsyncCallback<Payee>() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-
-                            }
-
-                            @Override
-                            public void onSuccess(Payee payee) {
-                                Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
-                                decoratedPopupPanel.hide(true);
-                            }
-                        },
-                        new AsyncCallback<Payee>() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                report(throwable);
-                            }
-
-                            @Override
-                            public void onSuccess(final Payee payee) {
-                                new Timer() {
-                                    @Override
-                                    public void run() {
-                                        lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
-                                            @Override
-                                            public void onFailure(Throwable throwable) {
-                                                report(throwable);
-                                            }
-
-                                            @Override
-                                            public void onSuccess(final Payee payee) {
-                                                populatePayeeList(group);
-                                            }
-                                        });
-                                    }
-                                }.schedule(1000);
-
-
-                            }
-                        });
-
+            public void onSuccess(List<Payee> payees) {
+                payeeBox.clear();
+                for (Payee payee : payees) {
+                    payeeBox.addItem(payee.getNickname());
+                }
             }
-
-            void report(Throwable t) {
-                Window.setStatus("payee was not added to " + group.getName() + ": " + t.getMessage());
-            }
-        }
-
-
+        });
     }
 }
 
