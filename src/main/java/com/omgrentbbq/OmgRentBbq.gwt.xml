@@ -16,6 +16,7 @@
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='com.omgrentbbq.client.App'/>
+    <entry-point class="com.omgrentbbq.client.Auth"/>
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>

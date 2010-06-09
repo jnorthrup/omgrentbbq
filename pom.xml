@@ -143,7 +143,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <runTarget>/Customer.html</runTarget>
+                    <runTarget>/</runTarget>
                 </configuration>
             </plugin>
             <plugin>

@@ -20,7 +20,7 @@ public interface Login extends RemoteService {
     public Group[] getGroups(User user);
 
 
-    void createNewMember(User user, Contact profile, Group[] groups);
+    void createNewMember(User user, Contact profile/*, Group[] groups*/);
 
     List<Payee> getPayeesForGroup(Serializable serializable);
 

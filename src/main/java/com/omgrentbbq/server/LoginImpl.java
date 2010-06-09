@@ -104,24 +104,18 @@ public class LoginImpl extends HybridServiceServlet implements Login {
     }
 
     @Override
-    public void createNewMember(final User user, final Contact profile, Group[] groups) {
+    public void createNewMember(User user, Contact profile) {
         embed(new Pair<String, Memento>("profile", profile), user);
         update(user);
-        if (groups.length == 0) {
-            final Group group = new Group();
-            group.$("name", profile.$("name") + "'s free private membership");
-            group.$("private", true);
-            group.$("immutable", true);
-
-            groups = new Group[]{group};
-        }
+        final Group group = new Group();
+        group.$("name", profile.$("name") + "'s free private membership");
+        group.$("private", true);
+        group.$("immutable", true);
 
         MementoFactory.update(user);
-        for (Group group : groups) {
-            update(group);
-            final Membership membership = new Membership(user, group);
-            update(membership);
-        }
+        update(group);
+        final Membership membership = new Membership(user, group);
+        update(membership);
     }
 
     @Override

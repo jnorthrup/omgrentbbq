@@ -3,14 +3,18 @@ package com.omgrentbbq.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
 import com.omgrentbbq.client.ui.ContactCreationForm;
+import com.omgrentbbq.client.ui.GroupsFlexTable;
+import com.omgrentbbq.client.ui.PayeePanel;
 import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.shared.model.*;
 
@@ -30,7 +34,7 @@ public class App implements EntryPoint {
     public static final String SERVER_ERROR = "An error occurred while "
             + "attempting to contact the server. Please check your network "
             + "connection and try again.";
-    DockPanel panel = new DockPanel(); 
+    DockPanel panel = new DockPanel();
 
 
     final ListBox groupList = new ListBox() {{
@@ -44,7 +48,7 @@ public class App implements EntryPoint {
         });
     }};
     static String GDATA_API_KEY;
-    Anchor authAnchor;
+
     TabPanel tabPanel = new TabPanel() {{
         setAnimationEnabled(true);
     }};
@@ -52,6 +56,7 @@ public class App implements EntryPoint {
 
     public LoginAsync lm = GWT.create(Login.class);
     public User user;
+    private VerticalPanel managePanel;
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -77,72 +82,67 @@ public class App implements EntryPoint {
             public void onSuccess(Pair<UserSession, String> userSessionURLPair) {
 
                 final UserSession userSession = userSessionURLPair.getFirst();
-                authAnchor = new Anchor();
-                panel.add(authAnchor, DockPanel.EAST);
+
                 String url = userSessionURLPair.getSecond();
-                authAnchor.setHref(url);
                 user = (User) userSession.$("user");
                 panel.add(tabPanel, DockPanel.CENTER);
                 tabPanel.add(new WelcomeTab(), "Welcome!");
                 tabPanel.selectTab(0);
 
-                if (null == user || !Boolean.valueOf(String.valueOf(userSession.$("userLoggedIn")))) {
-                    authAnchor.setText("Sign in using your google account now");
-                } else {
-                    authAnchor.setText("not " + user.$("nickname") + "? Sign Out");
+                if (null != user && Boolean.valueOf(String.valueOf(userSession.$("userLoggedIn")))) {
 
-                    GWT.runAsync(new RunAsyncCallback() {
+
+                    doEntry(userSession);
+                    if (userSession.isUserAdmin())
+                        panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
+
+                }
+            }
+        });
+    }
+
+    private void doEntry(final UserSession userSession) {
+        lm.getGroups(user, new AsyncCallback<Group[]>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public void onSuccess(final Group[] groups) {
+              App.this.groups=groups;
+                if (userSession.isUserAdmin())
+                    panel.add(new Label(Arrays.toString(groups)), DockPanel.SOUTH);
+
+
+                if (groups.length == 0) {
+                    tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
                         @Override
                         public void onFailure(Throwable throwable) {
-                            //To change body of implemented methods use File | Settings | File Templates.
                         }
 
                         @Override
-                        public void onSuccess() {
-
-                            lm.getGroups(user, new AsyncCallback<Group[]>() {
+                        public void onSuccess(Contact contact) {
+                            lm.createNewMember(user, contact, new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable throwable) {
-                                    //To change body of implemented methods use File | Settings | File Templates.
                                 }
 
                                 @Override
-                                public void onSuccess(final Group[] groups) {
-                                    App.this.groups = groups;
-                                    if (userSession.isUserAdmin())
-                                        panel.add(new Label(Arrays.toString(groups)), DockPanel.SOUTH);
-                                    if (groups.length == 0) {
-                                        tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
-                                            @Override
-                                            public void onFailure(Throwable throwable) {
-                                            }
-
-                                            @Override
-                                            public void onSuccess(Contact contact) {
-                                                lm.createNewMember(user, contact, new Group[0], new AsyncCallback<Void>() {
-                                                    @Override
-                                                    public void onFailure(Throwable throwable) {
-                                                    }
-
-                                                    @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        tabPanel.remove(1);
-                                                        GWT.runAsync(new ManageTabAsync(App.this));
-                                                    }
-                                                });
-
-                                            }
-                                        }), "Sign Up Free!");
-                                    } else {
-                                        GWT.runAsync(new ManageTabAsync(App.this));
-
-                                    }
+                                public void onSuccess(Void aVoid) {
+                                    tabPanel.remove(1);
+                                    doEntry(userSession);
                                 }
                             });
-                            if (userSession.isUserAdmin())
-                                panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
+
                         }
-                    });
+                    }), "Sign Up Free!");
+                } else {
+
+
+                    managePanel = new ManageVerticalPanel(groups);
+                    tabPanel.insert(managePanel, "Manage Groups", 1);
+
                 }
             }
         });
@@ -166,6 +166,127 @@ public class App implements EntryPoint {
                 }
             }
         });
+    }
+
+    public void groupReload(PopupPanel box) {
+        new Timer() {
+            @Override
+            public void run() {
+                lm.getGroups(user, new AsyncCallback<Group[]>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                    }
+
+                    @Override
+                    public void onSuccess(Group[] groups) {
+                        App.this.groups = groups;
+                        groupList.clear();
+                        for (Group group1 : groups) {
+                            groupList.addItem(group1.getName());
+
+                        }
+                        if (groupList.getItemCount() > 0) {
+                            groupList.setSelectedIndex(0);
+                            populatePayeeList(groups[0]);
+                        }
+                    }
+                });
+            }
+        }.schedule(1000);
+        box.hide(true);
+    }
+
+    class ManageVerticalPanel extends VerticalPanel {
+        public ManageVerticalPanel(final Group[] groups) {
+
+            FlexTable flexTable = new GroupsFlexTable(App.this );
+
+            add(flexTable);
+            add(new HorizontalPanel() {{
+                add(new Label("Payees"));
+                add(new Anchor("(+)") {{
+
+
+                    groupList.addChangeHandler(new ChangeHandler() {
+                        @Override
+                        public void onChange(ChangeEvent changeEvent) {
+
+                            final int index = groupList.getSelectedIndex();
+
+                            setTitle("add a new Payee to " + groups[index].getName());
+
+                        }
+                    });
+
+                    addClickHandler(
+                            new ClickHandler() {
+
+                                @Override
+                                public void onClick(ClickEvent clickEvent) {
+                                    final int index = groupList.getSelectedIndex();
+                                    if (index < 0) return;
+                                    final Group group = groups[index];
+
+
+                                    final DecoratedPopupPanel box = new DecoratedPopupPanel();
+                                    box.setAnimationEnabled(true);
+                                    final PayeePanel payeePanel = new PayeePanel(box,
+                                            new AsyncCallback<Payee>() {
+                                                @Override
+                                                public void onFailure(Throwable throwable) {
+
+                                                }
+
+                                                @Override
+                                                public void onSuccess(Payee payee) {
+                                                    Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
+
+                                                    box.hide(true);
+                                                }
+                                            },
+                                            new AsyncCallback<Payee>() {
+                                                @Override
+                                                public void onFailure(Throwable throwable) {
+                                                    report(throwable);
+                                                }
+
+                                                @Override
+                                                public void onSuccess(final Payee payee) {
+                                                    new Timer() {
+                                                        @Override
+                                                        public void run() {
+                                                            lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
+                                                                @Override
+                                                                public void onFailure(Throwable throwable) {
+                                                                    report(throwable);
+                                                                }
+
+                                                                @Override
+                                                                public void onSuccess(final Payee payee) {
+                                                                    populatePayeeList(group);
+                                                                }
+                                                            });
+                                                        }
+                                                    }.schedule(1000);
+
+
+                                                }
+                                            });
+
+                                }
+
+                                void report(Throwable t) {
+                                    Window.setStatus("payee was not added: " + t.getMessage());
+                                }
+                            });
+
+                }});
+                add(payeeBox);
+                populatePayeeList(groups[groupList.getSelectedIndex()]);
+                
+            }});
+
+        }
     }
 }
 

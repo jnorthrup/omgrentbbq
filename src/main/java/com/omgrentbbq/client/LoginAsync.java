@@ -3,8 +3,6 @@ package com.omgrentbbq.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.omgrentbbq.shared.model.*;
 
-import com.google.gwt.http.client.URL;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -20,7 +18,6 @@ public interface LoginAsync {
 
     void getPayeesForGroup(Serializable serializable, AsyncCallback<List<Payee>> async);
 
-    void createNewMember(User user, Contact profile, Group[] groups, AsyncCallback<Void> async);
 
     void getGroups(User user, AsyncCallback<Group[]> async);
 
@@ -29,4 +26,6 @@ public interface LoginAsync {
     void addGroup(User user, Group group, AsyncCallback<Void> async);
 
     void deleteGroup(User user, Group group, AsyncCallback<Void> async);
+
+    void createNewMember(User user, Contact profile,/*, Group[] groups*/AsyncCallback<Void> async);
 }
