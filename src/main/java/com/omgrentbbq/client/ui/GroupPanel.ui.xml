@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field="res" type="com.omgrentbbq.client.resources.MainBundle"/>
     <g:HTMLPanel>
-        <h2>create a new shared Payment Group</h2>
+        <h2>add a new Group payment</h2>
 
         <p/>
         name:
@@ -13,6 +13,7 @@
         <br/>
         <g:Button text="ok" ui:field="okButton"/>
         <g:Button text="cancel" ui:field="cancelButton"/>
-
+                      <br/>
+        <g:CaptionPanel ui:field="caption"/>
     </g:HTMLPanel>
 </ui:UiBinder>

@@ -29,6 +29,8 @@ public class GroupPanel extends Composite {
     @UiField
     public
     Button cancelButton;
+    @UiField
+    CaptionPanel caption;
 
     public GroupPanel() {
         HTMLPanel rootElement = ourUiBinder.createAndBindUi(this);

@@ -4,12 +4,14 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.App;
 import com.omgrentbbq.client.ui.GroupPanel;
 import com.omgrentbbq.shared.model.Group;
+import com.omgrentbbq.shared.model.Payee;
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -17,7 +19,7 @@ import com.omgrentbbq.shared.model.Group;
  * Date: Jun 8, 2010
  * Time: 1:57:56 PM
  */
-class GroupsFlexTable extends FlexTable {
+public class ManageGroupPanel extends FlexTable {
     public final Anchor removeAnchor;
     public final HTML headerHtml;
     public final Label groupsLabel;
@@ -25,7 +27,7 @@ class GroupsFlexTable extends FlexTable {
     private final App app;
 
 
-    public GroupsFlexTable(final App app) {
+    public ManageGroupPanel(final App app) {
         this.app = app;
 
         for (Group group : app.groups) {
@@ -120,9 +122,9 @@ class GroupsFlexTable extends FlexTable {
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent clickEvent) {
-                    final DialogBox box = new DialogBox();
+                    final DecoratedPopupPanel box = new DecoratedPopupPanel();
                     box.setAnimationEnabled(true);
-                    box.setText("<h2>add a new Group payment");
+                     
 
                     final GroupPanel groupPanel = new GroupPanel();
                     box.setWidget(groupPanel);
@@ -139,12 +141,12 @@ class GroupsFlexTable extends FlexTable {
                         public void onClick(ClickEvent clickEvent) {
                             final String s = groupPanel.name.getText();
                             if (s.isEmpty()) {
-                                box.setText("each group must have a name, please enter a name in the box");
+                               groupPanel. caption.setCaptionHTML("each group must have a name, please enter a name in the box");
                                 return;
                             } else {
                                 for (Group group1 : app.groups) {
                                     if (group1.getName().equals(s)) {
-                                        box.setText("this name is already in use, please choose a different name");
+                                        groupPanel.caption.setCaptionHTML("this name is already in use, please choose a different name");
                                         return;
                                     }
                                 }
@@ -153,7 +155,8 @@ class GroupsFlexTable extends FlexTable {
 
                             final Group group = new Group();
                             group.$("name", groupPanel.name.getText());
-                            group.$("privacy", groupPanel.privacy.getValue());
+                            final Boolean value = groupPanel.privacy.getValue();
+                            group.$("privacy", value);
 
                             app.lm.addGroup(app.user, group, new AsyncCallback<Void>() {
                                 @Override
@@ -178,4 +181,5 @@ class GroupsFlexTable extends FlexTable {
             super("(+)");
         }
     }
+
 }

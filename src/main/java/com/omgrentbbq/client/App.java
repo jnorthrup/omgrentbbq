@@ -5,17 +5,12 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
-import com.omgrentbbq.client.ui.ContactCreationForm;
-import com.omgrentbbq.client.ui.GroupsFlexTable;
-import com.omgrentbbq.client.ui.PayeePanel;
-import com.omgrentbbq.client.ui.WelcomeTab;
+import com.omgrentbbq.client.ui.*;
 import com.omgrentbbq.shared.model.*;
 
 import java.util.Arrays;
@@ -37,7 +32,7 @@ public class App implements EntryPoint {
     DockPanel panel = new DockPanel();
 
 
-    final ListBox groupList = new ListBox() {{
+    public final ListBox groupList = new ListBox() {{
         addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent changeEvent) {
@@ -140,7 +135,7 @@ public class App implements EntryPoint {
                 } else {
 
 
-                    managePanel = new ManageVerticalPanel(groups);
+                    managePanel = new ManagePanel(App.this );
                     tabPanel.insert(managePanel, "Manage Groups", 1);
 
                 }
@@ -196,97 +191,5 @@ public class App implements EntryPoint {
         box.hide(true);
     }
 
-    class ManageVerticalPanel extends VerticalPanel {
-        public ManageVerticalPanel(final Group[] groups) {
-
-            FlexTable flexTable = new GroupsFlexTable(App.this );
-
-            add(flexTable);
-            add(new HorizontalPanel() {{
-                add(new Label("Payees"));
-                add(new Anchor("(+)") {{
-
-
-                    groupList.addChangeHandler(new ChangeHandler() {
-                        @Override
-                        public void onChange(ChangeEvent changeEvent) {
-
-                            final int index = groupList.getSelectedIndex();
-
-                            setTitle("add a new Payee to " + groups[index].getName());
-
-                        }
-                    });
-
-                    addClickHandler(
-                            new ClickHandler() {
-
-                                @Override
-                                public void onClick(ClickEvent clickEvent) {
-                                    final int index = groupList.getSelectedIndex();
-                                    if (index < 0) return;
-                                    final Group group = groups[index];
-
-
-                                    final DecoratedPopupPanel box = new DecoratedPopupPanel();
-                                    box.setAnimationEnabled(true);
-                                    final PayeePanel payeePanel = new PayeePanel(box,
-                                            new AsyncCallback<Payee>() {
-                                                @Override
-                                                public void onFailure(Throwable throwable) {
-
-                                                }
-
-                                                @Override
-                                                public void onSuccess(Payee payee) {
-                                                    Window.setStatus("payee " + payee.getNickname() + " was successfully added to " + group.getName());
-
-                                                    box.hide(true);
-                                                }
-                                            },
-                                            new AsyncCallback<Payee>() {
-                                                @Override
-                                                public void onFailure(Throwable throwable) {
-                                                    report(throwable);
-                                                }
-
-                                                @Override
-                                                public void onSuccess(final Payee payee) {
-                                                    new Timer() {
-                                                        @Override
-                                                        public void run() {
-                                                            lm.addPayeeForGroup(payee, group, new AsyncCallback<Payee>() {
-                                                                @Override
-                                                                public void onFailure(Throwable throwable) {
-                                                                    report(throwable);
-                                                                }
-
-                                                                @Override
-                                                                public void onSuccess(final Payee payee) {
-                                                                    populatePayeeList(group);
-                                                                }
-                                                            });
-                                                        }
-                                                    }.schedule(1000);
-
-
-                                                }
-                                            });
-
-                                }
-
-                                void report(Throwable t) {
-                                    Window.setStatus("payee was not added: " + t.getMessage());
-                                }
-                            });
-
-                }});
-                add(payeeBox);
-                populatePayeeList(groups[groupList.getSelectedIndex()]);
-                
-            }});
-
-        }
-    }
 }
 

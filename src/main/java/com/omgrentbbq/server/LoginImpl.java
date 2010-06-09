@@ -7,11 +7,19 @@ import com.google.gwt.user.server.rpc.HybridServiceServlet;
 import com.omgrentbbq.client.Login;
 import com.omgrentbbq.shared.model.*;
 
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import static com.omgrentbbq.server.MementoFactory.*;
 
@@ -109,7 +117,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         update(user);
         final Group group = new Group();
         group.$("name", profile.$("name") + "'s free private membership");
-        group.$("private", true);
+        group.$("privacy", true);
         group.$("immutable", true);
 
         MementoFactory.update(user);
@@ -167,6 +175,98 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         if (count < 2) {
             DS.delete($k(group));
         }
+
+    }
+
+    @Override
+    public void inviteUserToGroup(User user, Group group, String emailAddress) {
+        if (emailAddress.isEmpty())
+            emailAddress = "jimn235@hotmail.com";
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        final String s = getThreadLocalRequest().getRequestURI();
+        String out = null;
+        try {
+            final URI uri = new URI(s).normalize();
+
+            char c;
+            c = uri.getQuery().isEmpty() ? '?' : '&';
+            final Invitation invitation = new Invitation();
+            invitation.$("from", user);
+            invitation.$("to", emailAddress);
+            invitation.$("group", group);
+
+            update(invitation);
+            final Key key = $k(invitation);
+            out = uri.toASCIIString() + c + "invitation=" + KeyFactory.keyToString(key);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        String msgBody = "Hello!\nOmgRentBBq.com user " + user.getNickname() + " has invited you to participate in the group called " + group.getName() + "\n" +
+                "you can create an Id in seconds and log in to accpet this invitation using the following URL (click or paste into browser):\n" +
+                "\n\n" +
+                out;
+        try {
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(user.<String>$("email"), user.getNickname()));
+            msg.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress(emailAddress));
+            msg.setSubject("OmgRentBBq invitation to join group " + group.getName());
+            msg.setText(msgBody);
+            Transport.send(msg);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void createShare(Membership membership, Share.ShareType shareType, Float amount) {
+        try {
+            Entity entity = DS.get($k(membership));
+            final Membership membership1 = $(entity, Membership.class);
+
+            entity = DS.get($k((Group) membership.getGroup()));
+
+            Group group = $(entity, Group.class);
+            entity = DS.get($k((User) membership.getUser()));
+            User user = $(entity, User.class);
+
+
+            final Share share = new Share(shareType, membership, amount);
+            embed(new Pair<String, Memento>("user", user), share);
+            embed(new Pair<String, Memento>("group", group), share);
+
+            update(
+                    share
+            );
+        } catch (EntityNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public Share[] getShares(Group group) {
+        final Query query = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $k(group)).setKeysOnly();
+        final Iterable<Entity> entityIterable = DS.prepare(query).asIterable();
+        final ArrayList<Key> arrayList1 = new ArrayList<Key>();
+        for (Entity entity : entityIterable) {
+            arrayList1.add(entity.getKey());
+        }
+
+        final Query query1 = new Query(Share.class.getName()).addFilter("member", Query.FilterOperator.IN, arrayList1);
+        final Iterator<Entity> entityIterator = DS.prepare(query1).asIterator();
+        final ArrayList<Share> arrayList = new ArrayList<Share>();
+        while (entityIterator.hasNext()) {
+            Entity entity = entityIterator.next();
+            final Share share = $(entity, Share.class);
+            arrayList.add(share);
+        }
+        return arrayList.toArray(new Share[arrayList.size()]);
+
 
     }
 }

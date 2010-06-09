@@ -29,4 +29,9 @@ public interface Login extends RemoteService {
     void addGroup(User user, Group group);
 
     void deleteGroup(User user, Group group);
+
+    void inviteUserToGroup(User user,Group group,String emailAddress);
+
+    void createShare(Membership membership,Share.ShareType shareType,Float amount );
+    Share[] getShares(Group group);
 }

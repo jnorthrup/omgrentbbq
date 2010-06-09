@@ -27,5 +27,13 @@ public interface LoginAsync {
 
     void deleteGroup(User user, Group group, AsyncCallback<Void> async);
 
-    void createNewMember(User user, Contact profile,/*, Group[] groups*/AsyncCallback<Void> async);
+    void createNewMember(User user, Contact profile, AsyncCallback<Void> async);
+
+    void inviteUserToGroup(User user, Group group, String emailAddress, AsyncCallback<Void> async);
+
+ 
+    void getShares(Group group, AsyncCallback<Share[]> async);
+
+
+    void createShare(Membership membership, Share.ShareType shareType, Float amount, AsyncCallback<Void> async);
 }
