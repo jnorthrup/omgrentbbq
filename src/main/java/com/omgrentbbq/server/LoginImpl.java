@@ -12,14 +12,14 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static com.omgrentbbq.server.MementoFactory.*;
 
@@ -178,6 +178,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
 
     }
 
+
     @Override
     public void inviteUserToGroup(User user, Group group, String emailAddress) {
         if (emailAddress.isEmpty())
@@ -185,13 +186,21 @@ public class LoginImpl extends HybridServiceServlet implements Login {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
-        final String s = getThreadLocalRequest().getRequestURI();
+        final HttpServletRequest servletRequest = getThreadLocalRequest();
+        final Properties p = new Properties();
+        try {
+            p.load(new StringReader( servletRequest.toString().replace(": ","=")));
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        final String s = servletRequest.getRequestURI();
+
         String out = null;
         try {
-            final URI uri = new URI(s).normalize();
+            final URI uri = new URI((String) p.get("Origin")) ;
 
             char c;
-            c = uri.getQuery().isEmpty() ? '?' : '&';
+            c = uri.getQuery()==null ? '?' : '&';
             final Invitation invitation = new Invitation();
             invitation.$("from", user);
             invitation.$("to", emailAddress);
@@ -215,8 +224,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
                     new InternetAddress(emailAddress));
             msg.setSubject("OmgRentBBq invitation to join group " + group.getName());
             msg.setText(msgBody);
-            Transport.send(msg);
-
+            Transport.send(msg); 
         } catch (Exception e) {
             e.printStackTrace();
         }

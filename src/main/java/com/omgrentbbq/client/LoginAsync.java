@@ -36,4 +36,5 @@ public interface LoginAsync {
 
 
     void createShare(Membership membership, Share.ShareType shareType, Float amount, AsyncCallback<Void> async);
-}
+
+ }
