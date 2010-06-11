@@ -140,7 +140,7 @@ public class MementoFactory {
         return key;
     }
 
-    private static <T extends Memento> Entity $(T t) {
+    public static <T extends Memento> Entity $(T t) {
         Entity entity;
         if (null != t.$$())
 

@@ -6,4 +6,8 @@ public class User extends Memento {
     public String getNickname() {
         return $("nickname");
     }
+
+    public void setEmail(String s) {
+        $("email",s); 
+    }
 }

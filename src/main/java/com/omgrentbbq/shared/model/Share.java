@@ -2,7 +2,8 @@ package com.omgrentbbq.shared.model;
 
 public class Share extends Memento {
     public static enum ShareType {
-        fixedAmount, pieShare
+        pieShare,
+        fixedAmount,
     }
 
     private Membership membership;

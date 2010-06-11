@@ -24,4 +24,9 @@ public class Membership extends Memento {
     public Serializable getUser() {
         return $("user");
     }
+    public Share getShare() {
+        final Share share = new Share();
+        embed("share", share);
+        return share;
+    }
 }

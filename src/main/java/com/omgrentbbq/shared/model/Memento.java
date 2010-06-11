@@ -20,18 +20,18 @@ public class Memento implements Serializable {
     public Serializable $$;
 
 
-    public <T extends Serializable>T $(String k) {
+    public <T extends Serializable> T $(String k) {
         if ($$ instanceof Pair) {
-            Pair<String,   Memento> pair = (Pair<String,   Memento>) $$;
-            return (T)pair.getSecond().$(pair.getFirst() + "." + k);
+            Pair<String, Memento> pair = (Pair<String, Memento>) $$;
+            return (T) pair.getSecond().$(pair.getFirst() + "." + k);
         } else
             return (T) $.get(k);
     }
 
-    public <T extends Serializable> T $(String k,Serializable t) {
+    public <T extends Serializable> T $(String k, Serializable t) {
         if ($$ instanceof Pair) {
-            Pair<String,  Memento> pair = (Pair<String,  Memento>) $$;
-            return (T)pair.getSecond().$(pair.getFirst() + "." + k, t);
+            Pair<String, Memento> pair = (Pair<String, Memento>) $$;
+            return (T) pair.getSecond().$(pair.getFirst() + "." + k, t);
         } else
             return (T) $.put(k, t);
     }
@@ -83,6 +83,10 @@ public class Memento implements Serializable {
 
     public void $$(Serializable $$) {
         this.$$ = $$;
+    }
+
+    public <T extends Memento> void embed(String name, T $) {
+        $.$$(new Pair<String, Memento>(name, $));
     }
 }
 

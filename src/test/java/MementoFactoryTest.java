@@ -2,14 +2,15 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.omgrentbbq.server.MementoFactory;
-import com.omgrentbbq.shared.model.KeyProperty;
-import com.omgrentbbq.shared.model.Memento;
+import com.omgrentbbq.shared.model.*;
 import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.Serializable;
 import java.util.Map;
+
+import static com.omgrentbbq.server.MementoFactory.update;
 
 /**
  * Copyright 2010 Glamdring Incorporated Enterprises.
@@ -91,6 +92,17 @@ public class MementoFactoryTest extends TestCase {
         assertFalse(memento.$.get("x").equals("x"));
         assertEquals(memento.$.get("x"),("!x"));
         assertEquals(memento.$.size(), 1);
+
+    }
+
+    public void testInvitationResponse(){
+        final User from = new User();
+        from.setEmail("jimn235@site1.com")       ;
+        update(from)      ;
+        String toEmail = "jim@example.com";
+        final Group group = new Group();
+        final Membership membership = new Membership(from, group);
+        
 
     }
 }

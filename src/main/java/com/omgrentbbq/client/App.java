@@ -3,6 +3,7 @@ package com.omgrentbbq.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.Timer;
@@ -10,7 +11,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.omgrentbbq.client.resources.MainBundle;
-import com.omgrentbbq.client.ui.*;
+import com.omgrentbbq.client.ui.ContactCreationForm;
+import com.omgrentbbq.client.ui.ManagePanel;
+import com.omgrentbbq.client.ui.WelcomeTab;
 import com.omgrentbbq.shared.model.*;
 
 import java.util.Arrays;
@@ -51,7 +54,6 @@ public class App implements EntryPoint {
 
     public LoginAsync lm = GWT.create(Login.class);
     public User user;
-    private VerticalPanel managePanel;
 
     public void onModuleLoad() {
         String host = Window.Location.getHost();
@@ -84,13 +86,11 @@ public class App implements EntryPoint {
                 tabPanel.add(new WelcomeTab(), "Welcome!");
                 tabPanel.selectTab(0);
 
+
                 if (null != user && Boolean.valueOf(String.valueOf(userSession.$("userLoggedIn")))) {
-
-
                     doEntry(userSession);
                     if (userSession.isUserAdmin())
                         panel.add(new Label(userSession.toString()), DockPanel.SOUTH);
-
                 }
             }
         });
@@ -100,16 +100,13 @@ public class App implements EntryPoint {
         lm.getGroups(user, new AsyncCallback<Group[]>() {
             @Override
             public void onFailure(Throwable throwable) {
-                //To change body of implemented methods use File | Settings | File Templates.
             }
 
             @Override
             public void onSuccess(final Group[] groups) {
-              App.this.groups=groups;
+                App.this.groups = groups;
                 if (userSession.isUserAdmin())
                     panel.add(new Label(Arrays.toString(groups)), DockPanel.SOUTH);
-
-
                 if (groups.length == 0) {
                     tabPanel.add(new ContactCreationForm(new AsyncCallback<Contact>() {
                         @Override
@@ -129,16 +126,41 @@ public class App implements EntryPoint {
                                     doEntry(userSession);
                                 }
                             });
-
                         }
                     }), "Sign Up Free!");
                 } else {
+                    tabPanel.insert(new ManagePanel(App.this), "Manage Groups", 1);
+                    final String invKey = Window.Location.getParameter("invitation");
+                    if (!invKey.isEmpty()) {
+                    GWT.runAsync(new RunAsyncCallback() {
+                        @Override
+                        public void onFailure(Throwable throwable) {
 
 
-                    managePanel = new ManagePanel(App.this );
-                    tabPanel.insert(managePanel, "Manage Groups", 1);
+                        }
+
+                        @Override
+                        public void onSuccess() {
+                            lm.createSharesFromInvite(user, invKey,
+                                    new AsyncCallback<Boolean>() {
+                                        @Override
+                                        public void onFailure(Throwable throwable) {
+                                            Window.setStatus("Invitation was not propcessed");
+                                        }
+
+                                        @Override
+                                        public void onSuccess(Boolean aBoolean) {
+                                            final String s = Window.Location.getHref().replace("invitation=", "_");
+                                            Window.Location.assign(s);
+                                        }
+                                    });
+                        }
+                    });
+
+                    }
 
                 }
+
             }
         });
     }

@@ -123,8 +123,7 @@ public class ManagePanel extends VerticalPanel {
 
     private Group getCurrentGroup(App app) {
         final int selectedIndex = app.groupList.getSelectedIndex();
-        final Group group = app.groups[selectedIndex];
-        return group;
+        return app.groups[selectedIndex];
     }
 }
 
