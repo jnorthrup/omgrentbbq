@@ -53,7 +53,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             try {
 
                 Entity entity =
-                        DS.get($k(User.class, sysuser.getUserId()));
+                        DS.get($$(User.class, sysuser.getUserId()));
 
                 user = $(entity, User.class);
                 update(user);
@@ -144,7 +144,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             invitation.$("group", group);
 
             update(invitation);
-            final Key key = $k(invitation);
+            final Key key = $$(invitation);
             out = uri.toASCIIString() + c + "invitation=" + KeyFactory.keyToString(key);
 
         } catch (URISyntaxException e) {

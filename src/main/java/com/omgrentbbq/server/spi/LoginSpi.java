@@ -30,7 +30,7 @@ public class LoginSpi implements Login {
 
     @Override
     public Group[] getGroups(User user) {
-        final Key key = $k(user);
+        final Key key = $$(user);
         final ArrayList<Group> a = new ArrayList<Group>();
         new Query(Membership.class.getName())
                 .addFilter("user", Query.FilterOperator.EQUAL, key);
@@ -85,9 +85,9 @@ public class LoginSpi implements Login {
         Key key;
         if (serializable instanceof Group) {
             Group group = (Group) serializable;
-            key = $k(group);
+            key = $$(group);
         } else {
-            key = $k(Group.class, serializable);
+            key = $$(Group.class, serializable);
 
         }
         final Iterator<Entity> entityIterator = DS.prepare(
@@ -119,15 +119,15 @@ public class LoginSpi implements Login {
     @Override
     public void deleteGroup(User user, Group group) {
 
-        final Query queryMembersForGroup = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $k(group));
+        final Query queryMembersForGroup = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $$(group));
         final int count = DS.prepare(queryMembersForGroup).countEntities();
-        final Iterable<Entity> entityIterable = DS.prepare(queryMembersForGroup.addFilter("user", Query.FilterOperator.EQUAL, $k(user))).asIterable();
+        final Iterable<Entity> entityIterable = DS.prepare(queryMembersForGroup.addFilter("user", Query.FilterOperator.EQUAL, $$(user))).asIterable();
         for (Entity entity : entityIterable) {
             DS.delete(entity.getKey());
         }
 
         if (count < 2) {
-            DS.delete($k(group));
+            DS.delete($$(group));
         }
 
     }
@@ -135,13 +135,13 @@ public class LoginSpi implements Login {
     @Override
     public void createShare(Membership membership, Share.ShareType shareType, Float amount) {
         try {
-            Entity entity = DS.get($k(membership));
+            Entity entity = DS.get($$(membership));
             final Membership membership1 = $(entity, Membership.class);
 
-            entity = DS.get($k((Group) membership.getGroup()));
+            entity = DS.get($$((Group) membership.getGroup()));
 
             Group group = $(entity, Group.class);
-            entity = DS.get($k((User) membership.getUser()));
+            entity = DS.get($$((User) membership.getUser()));
             User user = $(entity, User.class);
 
 
@@ -160,7 +160,7 @@ public class LoginSpi implements Login {
 
     @Override
     public Share[] getShares(Group group) {
-        final Query query = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $k(group)).setKeysOnly();
+        final Query query = new Query(Membership.class.getName()).addFilter("group", Query.FilterOperator.EQUAL, $$(group)).setKeysOnly();
         final Iterable<Entity> entityIterable = DS.prepare(query).asIterable();
         final ArrayList<Key> arrayList1 = new ArrayList<Key>();
         for (Entity entity : entityIterable) {
@@ -225,8 +225,8 @@ public class LoginSpi implements Login {
 
     private static Membership loadMembership(Group group, User from) {
         final Query query = new Query(Membership.class.getName())
-                .addFilter("user", Query.FilterOperator.EQUAL, $k(from))
-                .addFilter("group", Query.FilterOperator.EQUAL, $k(group));
+                .addFilter("user", Query.FilterOperator.EQUAL, $$(from))
+                .addFilter("group", Query.FilterOperator.EQUAL, $$(group));
         final Entity entity = DS.prepare(query).asSingleEntity();
         return $(entity, Membership.class);
     }

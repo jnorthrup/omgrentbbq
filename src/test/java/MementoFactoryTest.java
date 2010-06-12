@@ -2,6 +2,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.omgrentbbq.server.MementoFactory;
+import com.omgrentbbq.server.spi.LoginSpi;
 import com.omgrentbbq.shared.model.*;
 import junit.framework.TestCase;
 import org.junit.After;
@@ -88,21 +89,32 @@ public class MementoFactoryTest extends TestCase {
         final Entity entity = new Entity("MockuserMemento");
         entity.setProperty("x", "!x");
         final Memento memento = MementoFactory.$(entity, MockUserMemento.class);
-        assertNull(memento.$.get("theSpecialId"));
-        assertFalse(memento.$.get("x").equals("x"));
-        assertEquals(memento.$.get("x"),("!x"));
+        assertNull(memento.$("theSpecialId"));
+        assertFalse(memento.$("x").equals("x"));
+        assertEquals(memento.$("x"), ("!x"));
         assertEquals(memento.$.size(), 1);
 
     }
 
-    public void testInvitationResponse(){
+    public void testInvitationResponse() {
         final User from = new User();
-        from.setEmail("jimn235@site1.com")       ;
-        update(from)      ;
+        from.setEmail("jimn235@site1.com");
         String toEmail = "jim@example.com";
+        from.setUserId(System.nanoTime());
+        update(from);
+
+
+
         final Group group = new Group();
+        MementoFactory.update(group);
         final Membership membership = new Membership(from, group);
-        
+        final User to = new User();
+        to.setUserId(System.currentTimeMillis());
+        MementoFactory.update(to);
+
+        final LoginSpi loginSpi = new LoginSpi();
+        loginSpi.assignMembership(to, from, group);
+
 
     }
 }

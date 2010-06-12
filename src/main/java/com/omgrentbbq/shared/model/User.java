@@ -8,6 +8,10 @@ public class User extends Memento {
     }
 
     public void setEmail(String s) {
-        $("email",s); 
+        $("email", s);
+    }
+
+    public void setUserId(long l) {
+        $("userId", l);
     }
 }

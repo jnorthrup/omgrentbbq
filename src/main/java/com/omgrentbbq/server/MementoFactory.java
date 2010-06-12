@@ -25,18 +25,20 @@ public class MementoFactory {
 
 
     }
+
     private static final String[] ACCESSORPREFIXES = new String[]{
             "get", "is"
     };
-    private static final DatastoreServiceConfig config = DatastoreServiceConfig .Builder.withReadPolicy(new ReadPolicy(ReadPolicy.Consistency.STRONG));
+    private static final DatastoreServiceConfig config = DatastoreServiceConfig.Builder.withReadPolicy(new ReadPolicy(ReadPolicy.Consistency.STRONG));
 
     public static <T extends Memento> void update(final T t) {
 
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-
         final Entity entity = $(t);
         Key key = ds.put(entity);
         t.$$(key.getName() == null ? key.getId() : key.getName());
+
+
     }
 
     /**
@@ -87,7 +89,7 @@ public class MementoFactory {
         if (aClass.isAnnotationPresent(KeyProperty.class)) {
             keyname = aClass.getAnnotation(KeyProperty.class).value();
             Serializable serializable = map.get(keyname);
-            key = $k(aClass, serializable);
+            key = $$(aClass, serializable);
 
             entity = new Entity(key);
         } else {
@@ -113,7 +115,7 @@ public class MementoFactory {
         return (T) memento;
     }
 
-    public static <T extends Memento> Key $k(T m) {
+    public static <T extends Memento> Key $$(T m) {
         Serializable serializable = m.$$();
         Key key;
         if (serializable instanceof Long) {
@@ -125,7 +127,7 @@ public class MementoFactory {
         return key;
     }
 
-    public static <T extends Memento> Key $k(Class<T> aClass, Serializable serializable) {
+    public static <T extends Memento> Key $$(Class<T> aClass, Serializable serializable) {
         Key key = null;
         try {
             if (serializable instanceof Long) {
@@ -141,15 +143,32 @@ public class MementoFactory {
     }
 
     public static <T extends Memento> Entity $(T t) {
-        Entity entity;
-        if (null != t.$$())
 
-            entity = new Entity($k(t));
-        else
-            entity = new Entity(t.getClass().getName());
+        Entity entity = null;
+
+        final KeyProperty property = t.getClass().getAnnotation(KeyProperty.class);
+        String annotation = null;
+        if (!(property == null)) annotation = property.value();
+        Key key = null;
+        if (annotation != null) {
+            Object o = null;
+            o = t.$(annotation);
+            if (null == o) {
+                entity = new Entity(t.getClass().getName());
+            } else if (o instanceof Long) {
+                Long aLong = (Long) o;
+                key = KeyFactory.createKey(t.getClass().getName(), aLong);
+            } else {
+                key = KeyFactory.createKey(t.getClass().getName(), String.valueOf(o));
+            }
+
+        }
+        if (entity == null)
+            entity = new Entity(key);
+
         for (String nkey : t.$.keySet()) {
             Serializable serializable = t.$(nkey);
-            if (serializable!=null&&serializable.getClass().isArray()) {
+            if (serializable != null && serializable.getClass().isArray()) {
                 final Class<? extends Serializable> type = (Class<? extends Serializable>) serializable.getClass().getComponentType();
 
                 entity.setProperty(nkey, listifyArray(serializable, type));
@@ -159,7 +178,7 @@ public class MementoFactory {
 
             } else if (serializable instanceof Memento) {
                 Memento memento = (Memento) serializable;
-                entity.setProperty(nkey, $k(memento));
+                entity.setProperty(nkey, $$(memento));
 
             } else {
                 entity.setProperty(nkey, serializable);
@@ -214,7 +233,7 @@ public class MementoFactory {
                     } else {
                         if (val instanceof Memento) {
                             Memento memento = (Memento) val;
-                            t.$(k, $k(memento));
+                            t.$(k, $$(memento));
                         } else if (val instanceof Key) {
                             Key key = (Key) val;
 
