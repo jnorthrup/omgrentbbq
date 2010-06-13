@@ -7,6 +7,7 @@ import com.omgrentbbq.shared.model.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -224,10 +225,39 @@ public class LoginSpi implements Login {
     }
 
     private static Membership loadMembership(Group group, User from) {
-        final Query query = new Query(Membership.class.getName())
-                .addFilter("user", Query.FilterOperator.EQUAL, $$(from))
-                .addFilter("group", Query.FilterOperator.EQUAL, $$(group));
-        final Entity entity = DS.prepare(query).asSingleEntity();
-        return $(entity, Membership.class);
+        final Key key = $$(from);
+        final Key key1 = $$(group);
+        Query grpQuery = new Query(Membership.class.getName())
+                .addFilter("group", Query.FilterOperator.EQUAL, key1).setKeysOnly();
+
+        final Iterable<Entity> entityIterable = DS.prepare(grpQuery).asIterable();
+        HashSet<Key> ar = new HashSet<Key>();
+        for (Entity entity : entityIterable) {
+            ar.add(entity.getKey());
+        }
+        Query userQuery = new Query(Membership.class.getName())
+                .addFilter("user", Query.FilterOperator.EQUAL, key);
+
+
+        final Iterable<Entity> iterable = DS.prepare(userQuery).asIterable();
+
+        Entity correct = null;
+        for (Entity entity : iterable) {
+            if (ar.contains((entity).getKey())) {
+                correct = entity;
+                break;
+            }
+        }
+
+        if (null == correct) {
+            grpQuery = new Query(Membership.class.getName())
+                    ;
+            final List<Entity> entities = DS.prepare(grpQuery).asList(FetchOptions.Builder.withDefaults());
+            return null;
+
+        } else
+
+
+            return $(correct, Membership.class);
     }
 }

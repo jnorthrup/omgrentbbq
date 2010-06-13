@@ -1,10 +1,8 @@
 package com.omgrentbbq.shared.model;
 
-import java.io.Serializable;
-
-public class Group extends Memento{
+public class Group extends Memento {
     public Group(String name) {
-        $("name",name);
+        $("name", name);
     }
 
     public Group() {
@@ -15,9 +13,14 @@ public class Group extends Memento{
     }
 
     public boolean isImmutable() {
-        return Boolean.TRUE.toString().equals( String.valueOf( $("immutable")));
+        return Boolean.TRUE.toString().equals(String.valueOf($("immutable")));
     }
+
     public boolean isPrivacy() {
-        return Boolean.TRUE.toString().equals( String.valueOf( $("privacy")));
+        return Boolean.TRUE.toString().equals(String.valueOf($("privacy")));
+    }
+
+    public void setName(String name) {
+        $("name", name);
     }
 }

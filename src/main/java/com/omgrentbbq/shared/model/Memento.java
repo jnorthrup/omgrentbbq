@@ -86,7 +86,7 @@ public class Memento implements Serializable {
     }
 
     public <T extends Memento> void embed(String name, T $) {
-        $.$$(new Pair<String, Memento>(name, $));
+        $.$$(new Pair<String, Memento>(name, this));
     }
 }
 

@@ -97,24 +97,39 @@ public class MementoFactoryTest extends TestCase {
     }
 
     public void testInvitationResponse() {
-        final User from = new User();
-        from.setEmail("jimn235@site1.com");
-        String toEmail = "jim@example.com";
-        from.setUserId(System.nanoTime());
-        update(from);
+        final User from = makeFromUser();
+
+        final Group group = makeTestGroup();
+
+        makeTestMembership(from, group);
 
 
-
-        final Group group = new Group();
-        MementoFactory.update(group);
-        final Membership membership = new Membership(from, group);
         final User to = new User();
+        String toEmail = "jim@example.com";
         to.setUserId(System.currentTimeMillis());
         MementoFactory.update(to);
 
         final LoginSpi loginSpi = new LoginSpi();
-        loginSpi.assignMembership(to, from, group);
+        loginSpi.assignMembership(to, from, group); 
+    }
 
+    private void makeTestMembership(User from, Group group) {
+        final Membership membership = new Membership(from, group);
+        update(membership);
+    }
 
+    private Group makeTestGroup() {
+        final Group group = new Group();
+        group.setName(""+System.currentTimeMillis());
+        MementoFactory.update(group);
+        return group;
+    }
+
+    private User makeFromUser() {
+        final User from = new User();
+        from.setUserId(System.nanoTime());
+        from.setEmail("jimn235@site1.com");
+        update(from);
+        return from;
     }
 }

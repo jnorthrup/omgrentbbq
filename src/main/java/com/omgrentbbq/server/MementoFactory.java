@@ -163,13 +163,18 @@ public class MementoFactory {
             }
 
         }
-        if (entity == null)
-            entity = new Entity(key);
+        if (entity == null) {
+            entity =
+                    key == null ?
+                            new Entity(t.getClass().getName()) :
+                            new Entity(key);
+        }
 
         for (String nkey : t.$.keySet()) {
             Serializable serializable = t.$(nkey);
             if (serializable != null && serializable.getClass().isArray()) {
-                final Class<? extends Serializable> type = (Class<? extends Serializable>) serializable.getClass().getComponentType();
+                final Class<? extends Serializable> type = (Class<? extends Serializable>)
+                        serializable.getClass().getComponentType();
 
                 entity.setProperty(nkey, listifyArray(serializable, type));
             } else if (serializable instanceof Enum) {
