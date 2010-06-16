@@ -4,7 +4,7 @@
     <g:HTMLPanel>
         <h2>add a new Group payment</h2>
 
-        <p/>
+        <hintPopup/>
         name:
         <g:TextBox ui:field="name"/>
         <br/>

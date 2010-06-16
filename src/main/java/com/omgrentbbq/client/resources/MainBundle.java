@@ -14,6 +14,9 @@ public interface MainBundle extends ClientBundle {
 
     public interface siteResource extends CssResource {
         String groupBox();
+        String panel();
+        String sPanel();
+
     }
 
     siteResource site();

@@ -45,7 +45,7 @@ public class App implements EntryPoint {
             }
         });
     }};
-    static String GDATA_API_KEY;
+    public static String GDATA_API_KEY;
 
     TabPanel tabPanel = new TabPanel() {{
         setAnimationEnabled(true);

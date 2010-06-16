@@ -1,4 +1,21 @@
 
+
+.sPanel {
+  width: 150px;
+  height: 100px;
+  position: absolute;
+  left: 15px;
+  top: 240px;
+}
+
+.panel {
+  background-color: #C3D9FF;
+  border: 1px solid #000000;
+  padding: 3px;
+  margin: 3px;
+  font-weight: normal;
+}
+
 .groupBox {
     background: #f5fffa;
     width: 90%;
