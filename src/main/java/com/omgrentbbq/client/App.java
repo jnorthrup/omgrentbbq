@@ -131,7 +131,7 @@ public class App implements EntryPoint {
                 } else {
                     tabPanel.insert(new ManagePanel(App.this), "Manage Groups", 1);
                     final String invKey = Window.Location.getParameter("invitation");
-                    if (!invKey.isEmpty()) {
+                    if (null!=invKey&&!invKey.isEmpty()) {
                     GWT.runAsync(new RunAsyncCallback() {
                         @Override
                         public void onFailure(Throwable throwable) {
