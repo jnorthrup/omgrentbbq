@@ -56,7 +56,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
                         DS.get($$(User.class, sysuser.getUserId()));
 
                 user = $(entity, User.class);
-                writeMemento(user, User.class);
+                 
                 if (!service.isUserLoggedIn()) {
                     url = service.createLoginURL(browserUrl);
                 } else {
@@ -80,7 +80,7 @@ public class LoginImpl extends HybridServiceServlet implements Login {
             userSession.$("userAdmin", service.isUserAdmin());
         } catch (Exception e) {
         }
-        writeMemento(userSession, UserSession.class);
+        update(userSession );
 
 
         return new Pair<UserSession, String>(userSession, url);

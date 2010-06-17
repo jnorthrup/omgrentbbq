@@ -20,11 +20,7 @@ import java.util.*;
  */
 public class MementoFactory {
 
-    static {
-        // eventually consistent reads
-
-
-    }
+    static final Map<Class, String> PKEY = new LinkedHashMap<Class, String>();
 
     private static final String[] ACCESSORPREFIXES = new String[]{
             "get", "is"
@@ -32,13 +28,28 @@ public class MementoFactory {
     private static final DatastoreServiceConfig config = DatastoreServiceConfig.Builder.withReadPolicy(new ReadPolicy(ReadPolicy.Consistency.STRONG));
 
     public static <T extends Memento> void update(final T t) {
-
+        preUpdate(t);
         DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
         final Entity entity = $(t);
         Key key = ds.put(entity);
         t.$$(key.getName() == null ? key.getId() : key.getName());
 
 
+    }
+
+    private static <T extends Memento> void preUpdate(T t) {
+        final Class<? extends Memento> aClass = t.getClass();
+        synchronized (PKEY) {
+            if (!PKEY.containsKey(aClass)) {
+                final KeyProperty annotation = aClass.getAnnotation(KeyProperty.class);
+                String s = null;
+                if (null != annotation) s = annotation.value().intern();
+                PKEY.put(aClass, s);
+            }
+        }
+        if (t.$$ == null && PKEY.containsKey(aClass)) {
+            t.$$ = t.$(PKEY.get(aClass));
+        }
     }
 
     /**
@@ -98,7 +109,8 @@ public class MementoFactory {
 
         for (String k : map.keySet()) {
             try {
-                if (!k.equals(keyname)) {
+                /*if (!k.equals(keyname)) */
+                {
                     entity.setProperty(k, map.get(k));
                 }
             } catch (Exception ignored) {
@@ -150,12 +162,18 @@ public class MementoFactory {
         String annotation = null;
         if (!(property == null)) annotation = property.value();
         Key key = null;
-        if (annotation != null) {
+        if (null != annotation ) {
             Object o = null;
             o = t.$(annotation);
-            if (null == o) {
+            /**
+             * pair key means we are an embedded memento
+             */
+            if (null == o)o=(t.$$ instanceof Pair)?null:t.$$;
+
+                if (null == o) {
                 entity = new Entity(t.getClass().getName());
-            } else if (o instanceof Long) {
+            } else
+            if (o instanceof Long) {
                 Long aLong = (Long) o;
                 key = KeyFactory.createKey(t.getClass().getName(), aLong);
             } else {

@@ -8,8 +8,8 @@
         name:
         <g:TextBox ui:field="name"/>
         <br/>
-        private:
-        <g:CheckBox ui:field="privacy"/>
+        privacy:
+        <g:CheckBox  title="checking this box indicates there are no shares or invitations intended for this group of payees and payments."  ui:field="privacy"/>
         <br/>
         <g:Button text="ok" ui:field="okButton"/>
         <g:Button text="cancel" ui:field="cancelButton"/>
